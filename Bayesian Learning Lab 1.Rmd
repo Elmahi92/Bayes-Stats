@@ -127,7 +127,9 @@ grp(10000,70,22,8,8)
 ```
 
 
-## Question 1 Daniel Bernoulli 
+## Question 2 Log-Normal distribution and Gini Coefficient
+
+# A
 
 First we find the value of tau, the question assume that we have 8 randomly selected persons thus we have n = 8 and we have the value of mu = 3.6 Given, to find the value of tau we use this equation: $$\tau^2\ =\ \sum_1^n(log\ y_i \ - \mu)^2/n$$'.
 *Note*
@@ -156,16 +158,86 @@ plt<-ggplot(df,aes(x=x))+geom_histogram(aes(y=..density..),color="white",
                                       fill='#14213D',binwidth = 0.05)+
                                             labs(x='Estimate Values',y=' ',
                                             title ='Posterior distribution')+
-                                            xlim(0,1)
+                                            xlim(0,1)+ 
+  geom_density(color = "#FCA311", size = 1)
 plt
 ```
 
+# B
 
+We define  The Gini coefficient as a measure of inequality in a distribution, typically used to measure income inequality. It ranges from 0 (perfect equality, where everyone has the same income) to 1 (perfect inequality, where one person has all the income). A Gini coefficient of 0.5, for example, indicates that 50% of the population has 50% of the total income, while the other 50% of the population has the remaining 50% of the income.
 
+*Steps*:
 
+1- We find the value of $\phi(\sigma/\sqrt2)$ by using the values of $\sigma^2$ from the estimated values in A using the formula $\sigma/\sqrt2$.
+2- We use the function $pnorm$ to find the values of $\phi$ where:
+  - q: the quantile(s) at which to evaluate the CDF.
+mean: the mean of the normal distribution (default value is 0).
+  - sd: the standard deviation of the normal distribution (default value is 1).
+  - lower.tail: a logical value indicating whether to compute the lower tail probability (TRUE, default) or the upper tail probability (FALSE).
+  - log.p: a logical value indicating whether to return the natural logarithm of the probability density (TRUE) or the probability density (FALSE, default).
+*Note that*:
+Quantiles are points in a probability distribution that divide the distribution into intervals of equal probability.In our case we use the probabilities from the function $x=rinvgamma(nDraws, shape=n/2, scale=n*tau2/2)$
 
+3- We calculate the value of G by pluggin 1 and 2
 
+```{r Gini, echo=FALSE}
+y<-c(33,24,48,32,55,74,23,17)
+#n is the sample size
+n=length(y)
+#the number of draws wanted
+nDraws=10000
+mu= 3.6
+logy= (log(y)-mu)^2
+tau2=sum(logy)/n
+# then we use the function rinvgamma from r and we change on the pramters shape and scale.
+df<-data.frame(x=rinvgamma(nDraws, shape=n/2, scale=n*tau2/2))
+# Calculating the value of Phi_arg which is simply the squar root of the estimated sigma
+df$phi_arg<-df$x/sqrt(2)
+# Calculating the value of Gini index by appling the formula G=2*phi(sigma/sqrt(2))-1
+df$G<-2*pnorm(sqrt(df$phi_arg),0,1)-1
+#Ploting the Gini distribution
+ggplot(df,aes(x=G))+geom_histogram(aes(y=..density..),color="white",
+                                   linetype=6,
+                                   fill='#14213D',binwidth = 0.05)+
+  labs(x='Estimate Values',y=' ',
+       title ='Distribution of Gini Coefficient')+
+  geom_density(color = "#FCA311", size = 1)
+```
+# C
+To find the 95% CI we use the function $qnorm()$in R with mean and Sd drived from the Gini distribution we found in the previous data.
+here we indicates that 0,025 is the 2,5% cut off point for both uppbe and lower limits.
 
+```{r CI, echo=FALSE}
+sample_mean= mean(df$G)
+sample_sd= sd(df$G)
+# Compute the 95% confidence interval
+lower_ci <- qnorm(0.025, mean = sample_mean, sd = sample_sd)
+upper_ci <- qnorm(1-0.025, mean = sample_mean, sd = sample_sd)
 
+# Print the confidence interval
+cat("95% confidence interval: [", round(lower_ci, 2), ",", round(upper_ci, 2), "]", "\n")
+
+```
+
+# D
+We define the Highest Posterior Density (HPD) interval is a type of confidence interval in Bayesian inference that contains the most credible values for a parameter based on the observed data. Specifically, it is the narrowest interval that contains a specified proportion (usually 95% or 99%) of the posterior distribution of the parameter.
+To do so First we generate a sample using the posterior mean and Sd then We use the function HDI to find the 95% CI from library(HDInterval)
+
+```{r HDPI, echo=FALSE}
+library(HDInterval)
+
+#First we generate a sample using the posterior mean and Sd
+post_G <- rnorm(n = 10000, mean = mean(df$G), sd = sd(df$G))
+post_G_density <- density(post_G)
+
+#We use the function HDI to find the 95% CI 
+hdpi=hdi(post_G, conf = 0.95)
+
+cat("95% equal tail interavl for G : [", round(lower_ci, 2), ",", round(upper_ci, 2), "]", "\n")
+
+cat("95% Highest Posterioe Density Interval for G: [", round(hdpi[1], 2), ",", round(hdpi[2], 2), "]", "\n")
+
+```
 
 
