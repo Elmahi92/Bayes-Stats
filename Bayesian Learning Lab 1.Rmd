@@ -240,4 +240,53 @@ cat("95% Highest Posterioe Density Interval for G: [", round(hdpi[1], 2), ",", r
 
 ```
 
+## Question 3 Bayesian inference for the concentration parameter in the von Mises distribution
+
+# A
+First to we drive our joint distribution to find the liklehood function from the model distribution.
+We have our model distribution $p(y|\mu,k)$ defined as:
+$$
+P(y|\mu,k)=\prod_{i=1}^n\ \frac{1}{2\pi I_0(k)}*exp(k*Cos(y-\mu))\\= \frac{1}{(2\pi)^n I_0(k)^n}* exp(k*Cos(\sum_{i=1}^n y_i-\mu))
+$$
+We have the prior k follows the $exp(\lambda=0.5)$
+$$
+p(k)=0.5*exp(-\lambda*k)
+$$
+now we drive the postrior distribution using bayse formula
+$$
+p(\theta|x)\propto p(x|\theta)\ p(\theta)
+$$
+We plug the liklehood function drived above with the prior we get:
+$$
+p(k|\mu,y)\propto\frac{1}{(2\pi)^n I_0(k)^n}* exp(k*Cos(\sum_{i=1}^n y_i-\mu))\ .\ 0.5*exp(-\lambda*k) \\
+\propto \frac{1}{I_0(k)^n}* exp(k*Cos(\sum_{i=1}^n y_i-\mu)- \frac{k}{2})
+$$
+Now we implement the code in R:
+
+```{r k, echo=FALSE}
+# The y and mu values given from the question 
+y<-c(-2.79,2.33,1.83,-2.44,2.23,2.33,2.07,2.02,2.14,2.54)
+mu<- 2.51
+n=length(y)
+
+#We generate a sequeance of k values by 0.1
+k<-seq(0.01,10,by=0.01)
+
+#The drived posterior function can be expressed by 
+#(0.5/(besselI(k,0))^n)*exp(k*sum(cos(y-mu))-(k*0.5)
+df<- data.frame(x=k,y=(0.5/(besselI(k,0))^n)*exp(k*sum(cos(y-mu))-(k*0.5)))
+
+#Plotting function:
+plt<-ggplot(df,aes(x=x,y=y))+geom_line(aes(),
+                                          color="#FCA311",linetype=1,size=1)+
+  labs(x='k values',y=' ',
+       title ='The posterior distribution of k for the wind direction data')+
+         geom_vline(xintercept =df$x[which.max(df$y)],
+                    # we use df$x[which.max(df$y)] to find the mode
+                    linetype = "dashed", color = "#14213D",size=.8)
+plt
+
+
+
+```
 
