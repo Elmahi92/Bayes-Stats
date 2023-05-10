@@ -64,16 +64,33 @@ for (i in 1:length(sigma2)) {
 
 plt<-ggplot(df,aes(x=cov_tm))+geom_line(aes(y=temp),
                                         color='#FCA311', size=.5)+
-  geom_line(aes(y=temp_p), color='#14213D',linetype=1)+
+  geom_line(aes(y=df[[i]]), color='#14213D',linetype=1)+
   #annotate(geom = "text", x = 8, y = Sd_true,
   #         label = paste0(format(round(Sd_true, 3), nsmall = 3)))+
   labs(x= 'time', y='temp')+
   theme_classic()
 plt
 
-library(tidyverse)
 
-df_long <- df %>%
-  pivot_longer(cols = -x_column, names_to = "Line", values_to = "Value")
 
-detach("ggplot2", unload = TRUE)
+# Define a vector of colors
+colors <- c("#FCA311", "#00FF00", "#0000FF", "#FFFF00", "#00FFFF",
+            "#FF00FF", "#800000", "#008000", "#000080", "#808000",
+            "#800080", "#008080", "#808080", "#FFC0CB", "#FFA500",
+            "#FFD700", "#A52A2A", "#7FFF00", "#FF1493", "#00BFFF")
+
+# Plot with different colored lines
+plt <- ggplot(df, aes(x = cov_tm, y = temp)) +
+  geom_line(aes(color = factor('temp')), size = 0.5)
+
+for (i in names(df)[-c(1:4, ncol(df))]) {
+  plt <- plt + geom_line(aes_string(y = i, color = factor(i)), linetype = 1)
+}
+
+# Map colors to the lines
+plt <- plt +
+  scale_color_manual(values = colors) +
+  labs(x = 'time', y = 'temp',color='Predictions with different Segma values') +
+  theme_classic()
+plt
+
