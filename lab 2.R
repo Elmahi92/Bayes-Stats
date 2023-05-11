@@ -94,3 +94,23 @@ plt <- plt +
   theme_classic()
 plt
 
+
+################################################################################
+
+
+
+
+y<-as.matrix(df$temp)
+x<-as.matrix(df$cov_tm)
+n<- length(y)
+k=2
+beta_ht<-(solve(t(x)%*%x))%*%(t(x)%*%y)
+s2<-(1/(n-k))*t((y-(x%*%beta_ht)))%*%(y-(x%*%beta_ht))
+
+df_<-(n-k)
+lmbda_<-s2
+sigma2<-rinvchisq(1,df_,lmbda_)
+rmvnorm(1,beta_ht,sigma2%*%solve(t(x)%*%x))
+
+
+

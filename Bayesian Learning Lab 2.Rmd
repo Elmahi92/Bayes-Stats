@@ -10,6 +10,7 @@ knitr::opts_chunk$set(echo = TRUE)
 library(ggplot2)
 library(mvtnorm)
 library(readxl)
+library(LaplacesDemon)
 ```
 
 ## Linear and polynomial regression
@@ -106,21 +107,23 @@ for (i in 1:length(sigma2)) {
   e<- rnorm(1,0,sigma2[i])
   res<-rmvnorm(1,mu_0,sigma2[i]*omega_0)
   temp= x=res[1,1]+res[1,2]*df$cov_tm+res[1,3]*df$cov_tm^2+e
-  df[[paste0("temp_p",i)]]<-temp 
+  df[[paste0("temp_fit_",sigma2[i])]]<-temp 
 }
 ```
 
 After we done with the draws now for every draw compute the regression curve
 ```{r plot,echo=FALSE,fig.align='center'}
 # Define a vector of colors
-colors <- c("#FCA311", "#00FF00", "#0000FF", "#FFFF00", "#00FFFF",
-            "#FF00FF", "#800000", "#008000", "#000080", "#808000",
-            "#800080", "#008080", "#808080", "#FFC0CB", "#FFA500",
-            "#FFD700", "#A52A2A", "#7FFF00", "#FF1493", "#00BFFF")
+colors <-palette('Tableau')
+  
+  #c("#FCA311", "#00FF00", "#0000FF", "#FFFF00", "#00FFFF",
+   #         "#FF00FF", "#800000", "#008000", "#000080", "#808000",
+    #        "#800080", "#008080", "#808080", "#FFC0CB", "#FFA500",
+     #       "#FFD700", "#A52A2A", "#7FFF00", "#FF1493", "#00BFFF")
 
 # Plot with different colored lines
 plt <- ggplot(df, aes(x = cov_tm, y = temp)) +
-  geom_line(aes(color = factor('temp')), size = 0.5)
+  geom_point(aes(color = factor('temp')), size = 1)
 
 for (i in names(df)[-c(1:4, ncol(df))]) {
   plt <- plt + geom_line(aes_string(y = i, color = factor(i)), linetype = 1)
@@ -133,3 +136,83 @@ plt <- plt +
   theme_classic()
 plt
 ```
+
+Comparing the above chart with our  prior beliefs which we can see by running the polynomial model using the *lm* function in R with df = 2 we can see the fitted regression line with to some extend follow our regression line when $\sigma^2$ is equal to *1.037*.
+
+```{r ploy,echo=FALSE,fig.align='center'}
+degree <- 2  # Set the degree of the polynomial
+x= df$cov_tm
+y= df$temp
+model <- lm(y ~ poly(x, degree, raw = TRUE))
+df_plt<- data.frame(x=x,y=y)
+z=predict(model)
+# Print the model summary
+
+
+# Plot the data and regression line
+plt <- ggplot(df_plt, aes(x = x, y = y)) +
+  geom_point(color = "#4E79A7", size = 1)+
+  geom_line(aes(y = z), color = "#FCA311", linetype = 1)+
+  labs(x = 'time', y = 'temp'
+       ,title ='Polynomial Regression with Dgree 2') +
+  theme_classic()
+plt
+summary(model)
+
+```
+
+
+## B
+
+As we want to estimate the uncertainty in the model parameters. Simulating from the joint posterior allows us to obtain a set of plausible values for all the parameters in the model, taking into account the observed data and prior information.
+to do so:
+we have our non-informative prior:
+$$
+\begin{aligned}
+p(\beta,\sigma^2) \propto \sigma^-1
+\end{aligned}
+$$
+Our joint posterior of $\beta$ and $\sigma^2$:
+$$
+\begin{aligned}
+\beta|\sigma^2,y \sim \mathcal{N}(\hat\beta,\sigma^2(X´X)^{-1})\\
+\sigma^2|y \sim Inv-\mathcal{\chi^2}(n-k,s^2)\\
+where:\\
+k=number\ of \ \beta s\ in \ our \ case \ 2\\
+\hat\beta= (X´X)^{-1} X´y\\
+s^2= \frac{1}{n-k}(y-X\hat\beta)´(y-X\hat\beta)
+\end{aligned}
+$$
+Thus to simulate from the joint posterior we need to simulate from:
+1- $p(\sigma|y$
+2- $p(\beta|\sigma^2,y)$
+
+And then we find the marginal posterior of $\beta$:
+$$\beta|y\sim t_n-k(\hat\beta,s^2(X´X)^-1)$$
+There for to draw a sample from the joint posterior distribution of $\beta_0,\beta_2,\beta_3\ and \ \sigma^2$: 
+we need first to calculate the value of $\hat\beta= (X´X)^-1X´y$
+```{r beta_hat,echo=FALSE}
+y<-as.matrix(df$temp)
+x<-as.matrix(df$cov_tm)
+n<- length(y)
+k=2
+beta_ht<-(solve(t(x)%*%x))%*%(t(x)%*%y)
+```
+
+Then we calculate the value of $s^2= \frac{1}{n-k}(y-X\hat\beta)´(y-X\hat\beta)$
+
+```{r s2,echo=FALSE}
+s2<-(1/n-k) %*% t((y-(x%*%beta_ht)))%*%(y-(x%*%beta_ht))
+```
+
+Now we generate  $\sigma^2$ from $\sigma^2|y \sim Inv-\mathcal{\chi^2}(n-k,s^2)$, we have that $Inv-\mathcal{\chi^2}$ in R is *rinvchisq*.
+
+```{r sigma2,echo=FALSE}
+df_<-(n-k)
+lmbda_<-s2
+sigma2<-rinvchisq(1,df_,lmbda_)
+```
+
+
+
+
