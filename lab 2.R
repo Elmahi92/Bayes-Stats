@@ -1,116 +1,128 @@
-library(mvtnorm)
-library(readxl)
 
-#reading the files 
-df<-read_xlsx("Linkoping2022.xlsx")
-#Creating the covariate_time vaiable as (the number of days sinvce the beginning of the year / 365)  
-a<- df$datetime
-#begunning of the year
-b<- '2022-01-01'
-a<-format.POSIXlt(strptime(a,'%Y-%m-%d'))
-b<-format.POSIXlt(strptime(b,'%Y-%m-%d'))
-#time diff from the 
-x<-as.vector(difftime(a,b,units='days'))
-df$cov_tm<-x/365
+# First we want to calculate the vale of beta and the Jacopiang inv of beta by using thge optim function and the code from the lec notes
+# Note that we have tau = 2 and prior beta follows N(0,tau^2I)
 
-########
-###A####
-########
-#We assume to use a conjugate prior from the linear regression in Lec 5 , we have been given the prior hyperparamteres as follow:
-mu_0= as.matrix(c(0,100,-100),ncol=3)
-omega_0=0.01*diag(3)
-v_0=1
-segma2_0=1
-n= length(df$temp)
-ndraws=10
+### Select Logistic or Probit regression and install packages ###
+Probit <- 0
 
-# we have the joint prior for beta and segma2 defined as B|Segma2 follows N(muo,sigma2*omegao_inv) and Segma2 follows Inv-Chi(v0,sigma2_0)
+### Prior and data inputs ###
+Covs <- c(2:8) # Select which covariates/features to include
+standardize <- F # If TRUE, covariates/features are standardized to mean 0 and variance 1
+lambda <- 2 # scaling factor for the prior of beta in our case tau = 2
 
-#First we draw our random samaple from inv-chi2 using the below defined function from Lec 3 slide 5
-# Step 1: Draw X ~ χ²(n - 1)
-draw_chi_sq <- function(n) {
-  return(rchisq(1, df = n - 1))
+# Loading out data set
+wat<-read.table("WomenAtWork.dat",header = T) # read data from file
+Nobs <- dim(wat)[1] # number of observations
+y <- wat[1] # y=1 if the women is working, otherwise y=0.
+X <- as.matrix(wat[,Covs]) # Covs matrix 7*7
+Xnames <- colnames(X)
+# Standraizing the covs matrix
+if (standardize){
+  Index <- 2:(length(Covs)-1)
+  X[,Index] <- scale(X[,Index])
 }
-# Step 2: Compute σ² = (n - 1) * s² / X
-compute_sigma_sq <- function(n, segma2_0, X) {
-  return((n - 1) * segma2_0 / X)
-}
+Npar <- dim(X)[2]
 
-# simulation
-segma_estimation <- function(n, mu_0, segma2_0, ndraws) {
-  results <- c()
+#############################################################################################
+# This is to add y variable as binary response and adding intercept, for now it's not needed
+# for (ii in 1:Nobs){
+#   if (wat$quality[ii] > 5){
+#     y[ii] <- 1
+#   }
+# }
+# wat <- data.frame(intercept=rep(1,Nobs),wat) # add intercept
+#############################################################################################3
+
+# Setting up the prior
+mu <- as.matrix(rep(0,Npar)) # Prior mean vector
+Sigma <- (lambda)^2 *diag(Npar) # Prior covariance matrix
+
+# Functions that returns the log posterior for the logistic and probit regression.
+# First input argument of this function must be the parameters we optimize on, 
+# i.e. the regression coefficients beta.
+
+LogPostLogistic <- function(betas,y,X,mu,Sigma){
+  linPred <- X%*%betas;
+  logLik <- sum( linPred*y - log(1 + exp(linPred)) );
+  # if (abs(logLik) == Inf){
+  #              logLik = -20000
+  #              }# Likelihood is not finite, stear the optimizer away from here!
+  logPrior <- dmvnorm(betas, mu, Sigma, log=TRUE);
   
-  for (i in 1:ndraws) {
-    X <- draw_chi_sq(n)
-    sigma_sq <- compute_sigma_sq(n, segma2_0, X)
-    results[i] <- sigma_sq
-  }
-  return(results)
+  return(logLik + logPrior)
 }
 
-sigma2<-segma_estimation(n, mu_0, segma2_0, ndraws)
-
-#Now we estimate the betas values using the formula B|Segma2 follows N(muo,sigma2*omegao_inv) and we fit the regression based on 
-# temp = beta0 + beta1 time + beta 2 time^2 + erorr
-
-# first we have our error follows the normal distrbution by 0 and 1 
-
-for (i in 1:length(sigma2)) {
-  e<- rnorm(1,0,sigma2[i])
-  res<-rmvnorm(1,mu_0,sigma2[i]*omega_0)
-  temp= x=res[1,1]+res[1,2]*df$cov_tm+res[1,3]*df$cov_tm^2+e
-  df[[paste0("temp_p",i)]]<-temp 
-}
-
-plt<-ggplot(df,aes(x=cov_tm))+geom_line(aes(y=temp),
-                                        color='#FCA311', size=.5)+
-  geom_line(aes(y=df[[i]]), color='#14213D',linetype=1)+
-  #annotate(geom = "text", x = 8, y = Sd_true,
-  #         label = paste0(format(round(Sd_true, 3), nsmall = 3)))+
-  labs(x= 'time', y='temp')+
-  theme_classic()
-plt
-
-
-
-# Define a vector of colors
-colors <- c("#FCA311", "#00FF00", "#0000FF", "#FFFF00", "#00FFFF",
-            "#FF00FF", "#800000", "#008000", "#000080", "#808000",
-            "#800080", "#008080", "#808080", "#FFC0CB", "#FFA500",
-            "#FFD700", "#A52A2A", "#7FFF00", "#FF1493", "#00BFFF")
-
-# Plot with different colored lines
-plt <- ggplot(df, aes(x = cov_tm, y = temp)) +
-  geom_line(aes(color = factor('temp')), size = 0.5)
-
-for (i in names(df)[-c(1:4, ncol(df))]) {
-  plt <- plt + geom_line(aes_string(y = i, color = factor(i)), linetype = 1)
-}
-
-# Map colors to the lines
-plt <- plt +
-  scale_color_manual(values = colors) +
-  labs(x = 'time', y = 'temp',color='Predictions with different Segma values') +
-  theme_classic()
-plt
-
-
+# Not in use we change the value to 0 at the beginning of the code
 ################################################################################
+LogPostProbit <- function(betas,y,X,mu,Sigma){
+  linPred <- X%*%betas;
+  SmallVal <- .Machine$double.xmin
+  logLik <- sum(y*log(pnorm(linPred)+SmallVal) + (1-y)*log(1-pnorm(linPred)+SmallVal))
+  logPrior <- dmvnorm(betas, mu, Sigma, log=TRUE);
+  return(logLik + logPrior)
+}
+##############################################################################
+# Select the initial values for beta
+initVal <- matrix(0,Npar,1)
+
+if (Probit==1){
+  logPost = LogPostProbit;
+} else{
+  logPost = LogPostLogistic;
+}
+
+# The argument control is a list of options to the optimizer optim, where fnscale=-1 means that we minimize 
+# the negative log posterior. Hence, we maximize the log posterior.  
+OptimRes <- optim(initVal,logPost,gr=NULL,y,X,mu,Sigma,method=c("BFGS"),control=list(fnscale=-1),hessian=TRUE)
+
+# Values of betas
+
+OptimRes$par[,1]
+
+# Printing the Hessian Matrix
+
+print(OptimRes$hessian)
 
 
 
+# Printing the results to the screen
+names(OptimRes$par) <- Xnames # Naming the coefficient by covariates
+approxPostStd <- sqrt(diag(solve(-OptimRes$hessian))) # Computing approximate standard deviations.
+names(approxPostStd) <- Xnames # Naming the coefficient by covariates
+print('The posterior mode is:')
+print(OptimRes$par)
+print('the Hessian Matrix:')
+print(OptimRes$hessian)
+print('The approximate posterior standard deviation is:')
+print(approxPostStd)
 
-y<-as.matrix(df$temp)
-x<-as.matrix(df$cov_tm)
-n<- length(y)
-k=2
-beta_ht<-(solve(t(x)%*%x))%*%(t(x)%*%y)
-s2<-(1/(n-k))*t((y-(x%*%beta_ht)))%*%(y-(x%*%beta_ht))
+# Now we compare with the results from the regresion model: glmModel<- glm(Work ~ 0 + ., data = WomenAtWork, family = binomial)
 
-df_<-(n-k)
-lmbda_<-s2
-sigma2<-rinvchisq(1,df_,lmbda_)
-rmvnorm(1,beta_ht,sigma2%*%solve(t(x)%*%x))
+glmModel<- glm(Work ~ 0 + ., data = wat, family = binomial)
+summary(glmModel)
+
+# Now we Compute an approximate 95% equal tail posterior probability interval for the regression coerffcient to the variable NSmallChild
+
+# We use the function rmvnorm to generate the variates using OptimRes$par as our mean and approxPostStd as sigma 
+postmode<-as.matrix(OptimRes$par[,1])
+poststd<- -solve(OptimRes$hessian)
+watvar<-data.frame(rmvnorm(n=2,mean = postmode, sigma = poststd))
+
+#For a 95% CI, you would typically calculate the lower and upper bounds at quantiles 0.025 and 0.975, respectively.
+print('An approximate 95% equal tail posterior probability interval for the regression coeffcient to the variable NSmallChild is:')
+print(quantile(watvar[,6],c(0.025,.975)))
 
 
-
+###B
+pred_prob<- function(ndraws,x_new){
+        x_new<-as.matrix(x_new,ncol=1)
+        betas<-rmvnorm(n=ndraws,mean = postmode, sigma = poststd)
+        pr_y<-data.frame(x=betas%*%x_new)
+        pr_y$x_logit<-1/(1+exp(-pr_y$x))
+        plt <- ggplot(pr_y,aes(x = x_logit)) +geom_histogram(aes(y=..density..),
+                linetype=1,
+                fill='#14213D')+
+                geom_density(alpha=.15,color="#FCA311",size=1,fill="#FCA311")+
+                labs(x='Pr(y=0|x)',y=' ',)
+        plt
+}
