@@ -1,6 +1,6 @@
 ---
 title: "Bayesian Learning Lab 1"
-author: "Mohamed Ali"
+author: "Mohamed Ali - Mohal954"
 date: '2023-05-06'
 output: pdf_document
 ---

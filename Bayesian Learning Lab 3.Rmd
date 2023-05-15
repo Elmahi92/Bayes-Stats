@@ -1,0 +1,143 @@
+---
+title: "Bayesian Learning Lab 3"
+author: "Mohamed Ali - Mohal954"
+date: "2023-05-15"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(LaplacesDemon)
+library(ggplot2)
+library(gridExtra)
+```
+
+# Gibbs sampler for a normal model
+
+# A
+
+Implement (code!) a Gibbs sampler that simulates from the joint posterior $p(\mu,\sigma^2|lny_1,...,lnyn)$. The full conditional posteriors are given on the slides from Lecture 7. Evaluate the convergence of the Gibbs sampler by calculating the Inefficiency Factors (IFs) and by plotting the trajectories of the sampled Markov chains.
+
+We start by building our function using the Slides notes we can define the Normal Model with Conditionally conjugate prior as:
+$$
+\begin{aligned}
+\mu &\sim N(\mu_0, \tau^2_0)
+\sigma &\sim Inv-\chi^2(v^2_0,\sigma_0^2)
+\end{aligned}
+$$
+And the full conditional posteriors:
+$$
+\begin{aligned}
+\mu|\sigma^2,x &\sim N(\mu_n,\tau^2_n)\\
+\sigma^2|\mu,x &\sim Inv-\chi^2(v_n,\frac{v_0\sigma^2+\sum_{i=1}^n(x_i-\mu)~^2}{n+v_0})
+\end{aligned}
+$$
+Where we have:
+$$
+\begin{aligned}
+\mu_n&=w\bar x + (1-w)\mu_0\\
+w&= \frac{\frac{n}{\sigma^2}}{\frac{n}{\sigma^2}+\frac{1}{\tau^2_0}}\\
+\frac{1}{\tau^2_n}&=\frac{n}{\sigma^2}+\frac{1}{\tau^2_0}\\
+v_n&= v_0+n
+\end{aligned}
+$$
+We start by defining the above variables in R, Note that as we have $p(lny_1,...,lnyn|\mu,\sigma^2) \sim N(\mu,\sigma^2)$ we will transform our variable by taking the natural log of the daily precipitation.
+```{r Preparing the data set, echo=T}
+# we start by reading our dataset using the readRDS command in R
+df <- data.frame(x=readRDS("Precipitation.rds"))
+# in the task we looking at natural log of the daily precipitation lny1,lny2,lny3,...lnyn follows N(mu,sigma)
+# We add a new var called logx 
+df$logx<- log(df$x)
+sigma2_0<- var(df$logx)  # Sample var
+tau2_0<- 1# arbirtry initail value let it be 1
+n<- nrow(df)# Sample size
+mu_0<- mean(df$logx)#sample mean
+w<- (n/sigma2_0)/((n/sigma2_0) + (1/tau2_0))# value used to calculate mu_n
+v_0<- 1 # arbirtry initail value let it be 1
+v_n<- v_0+n
+mu_n<- w*(mean(df$logx))+ (1-w)*mu_0
+tau2_n<- (n/sigma2_0)+(1/tau2_0)
+nDraws<- 1000
+gibbsDraws <- matrix(0,nDraws,2)
+```
+
+Now we write a code to simulates from the joint posterior using Gibbs sampler.
+```{r Gibbs Sampler, echo=T}
+### From lec notes we can use this part of the code
+for (i in 1:nDraws){
+  
+  # Update theta1 ----> mu given theta2
+  theta1 <- rnorm(1, mean = mu_n, sd = (1/tau2_n))
+  gibbsDraws[i,1] <- theta1
+  
+  scale<- ((v_0*sigma2_0)+(sum((df$logx-theta1)^2)))/(n+v_0)
+  # Update theta2 ----> sigma2 given theta1
+  theta2 <- rinvchisq(1,v_n,scale=scale)
+  gibbsDraws[i,2] <- theta2
+}
+```
+
+To Evaluate the convergence of the Gibbs sampler we calculate the Inefficiency Factors (IFs)$1+2 \sum_{k=1}^\infty \rho_k$ - where $\rho_k$ is the autocorrelation at lag k - and then we  plot the trajectories of the sampled Markov chains.
+
+```{r Gibbs plot, echo=FALSE,fig.keep='none'}
+a_Gibbs_mu <- acf(gibbsDraws[,1])
+a_Gibbs_sigma <- acf(gibbsDraws[,2])
+
+IF_Gibbs_mu <- 1+2*sum(a_Gibbs_mu$acf[-1])
+
+IF_Gibbs_sigma <- 1+2*sum(a_Gibbs_sigma$acf[-1])
+
+```
+
+```{r Gibbs Sampler, echo=FALSE}
+### From lec notes we can use this part of the code
+plot_df<- as.data.frame(cbind(1:nDraws,gibbsDraws))
+
+# Plot for Mu trajectories of the sampled Markov chains
+p1<-ggplot(plot_df,aes(x=V1))+geom_line(aes(y=V2), color='#FCA311', size=.8)+
+  annotate(geom = "text", x = 500, y = 1.312,
+           label = paste0("Inefficiency Factor ",format(round(IF_Gibbs_mu, 3), nsmall = 3)))+
+  labs(title = 'Mu trajectories of the sampled Markov chains',
+       x= 'nDraws', y='Mu')+ theme_classic()
+
+# Plot for Sigma trajectories of the sampled Markov chains
+p2<-ggplot(plot_df,aes(x=V1))+geom_line(aes(y=V3), color='#FCA311', size=.8)+
+  annotate(geom = "text", x = 500, y = 2,
+           label = paste0("Inefficiency Factor ",format(round(IF_Gibbs_sigma, 3), nsmall = 3)))+
+  labs(title = 'Sigma2 trajectories of the sampled Markov chains',
+       x= 'nDraws', y='Mu')+ theme_classic()
+
+
+p1+p2
+```
+
+The graph above shows the convergence of the Gibbs sampler and the Inefficiency Factors, the IF tell us number of iterations needed to get an independent sample from the posterior distribution, as we can see $\mu$ and $\sigma^2$ have 0,6 and 5,7 IF respectively, which tell us a better the convergence of the Gibbs sampler for the $\sigma^2$
+
+# B
+
+Plot the following in one figure:
+1) a histogram or kernel density estimate of the daily precipitation $(y_1,...,y_n)$.
+2)The resulting posterior predictive density $p(\tilde y|y_1,...,y_n)$ using the simulated posterior draws from (a).How well does
+the posterior predictive density agree with this data?
+
+To do we draw a sample from rnorm with mean and sd from the posterior results we got in (a)
+
+```{r hist and density plots, echo=FALSE}
+#  mean and Sd from the results of the Gibbs sampler plot_df$V2 represent mean and plot_df$V3 Var
+# The resulting posterior predictive density
+post_pred<- rnorm(1000, mean = plot_df$V2, sd = sqrt(plot_df$V3))
+y <- exp(post_pred)
+
+# Now we plot histogarm of the data and the posterior predictive denstity 
+
+#data frame to store the density values
+de_df<- data.frame(x=y)
+
+ggplot() +
+  geom_histogram(data=df,aes(x = x,y=..density..),linetype=1,fill='#14213D',bins = 20)+
+  geom_density(data=de_df,aes(x=y), color='#FCA311', size=1,fill='#FCA311',alpha=.5)+
+  labs(title = "Histogram of Daily Precipitation",
+       subtitle = "Line of Posterior predictive density",
+       x = "Precipitation",
+       y = "Density") + xlim(0.1,50)+ theme_classic()
+```

@@ -1,6 +1,6 @@
 ---
 title: "Bayesian learning Lab 2"
-author: "Mohamed Ali"
+author: "Mohamed Ali - Mohal954"
 date: '2023-05-10'
 output: pdf_document
 ---
@@ -13,6 +13,7 @@ library(mvtnorm)
 library(readxl)
 library(LaplacesDemon)
 library(patchwork)
+library(gridExtra)
 ```
 
 ## Linear and polynomial regression
@@ -151,7 +152,7 @@ z=predict(model)
 # Plot the data and regression line
 plt <- ggplot(df_plt, aes(x = x, y = y)) +
   geom_point(color = "#4E79A7", size = 1)+
-  geom_line(aes(y = z), color = "#FCA311", linetype = 1)+
+  geom_line(aes(y = z), color = "#FCA311",size=1 ,linetype = 1)+
   labs(x = 'Time', y = 'Temp'
        ,title ='Polynomial Regression with Dgree 2')
 plt
@@ -537,7 +538,7 @@ with an income of 18. Plot the posterior predictive distribution of Pr(y = 0|x) 
 First we estimate the values of $\beta$ using the normal approximation to the posterior from (a) above, the below graph shows the distribution of the estimated $\beta s$:
 
 ```{r predfn,echo=FALSE}
-betas<-rmvnorm(n=ndraws,mean = postmode, sigma = poststd)
+betas<-rmvnorm(n=10000,mean = postmode, sigma = poststd)
 # ploting the beta distribution 
 
 p_data<- as.data.frame(betas)
