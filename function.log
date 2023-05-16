@@ -1,0 +1,58 @@
+
+> nDraws=1000
+
+> c=.5
+
+> RWMSampler<- function(logPostFunc,c,nDraws,...){
++   # First we buld our data frame of samples
++   sample <- data.frame(matrix(nrow = nDraws, ncol = ncol(x)))
++   colnames(sample) <- colnames(x)
++   # The inital sample value c here represent a tuning parameter
++   sample[1,] <- mvrnorm(1, posteriorMode, c*postCov)
++   # Now we implement the Metropolis-Hastings in which we generate samples from the proposal distribution in this case 
++   # We look at the results of the first sample as theta_i-1 pluged in mvnorm to get theta_i and the we use the values in
++   # our proposed logPostFunc
++   i=1
++   while (i < nDraws) {
++     theta_old<-as.numeric(sample[i,])
++     theta_new<-mvrnorm(1,theta_old,c*postCov)
++   # We define th our accept/reject threshold 
++     th<-runif(1,0,1)
++     # now we find the value of the target/proposed distribution
++     proposed<- logPossion(theta_new,y = y,
++                           x = x,
++                           mu = posteriorMode,
++                           Sigma = postCov)
++     target<- logPossion(theta_old,y = y,
++                         x = x,
++                         mu = posteriorMode,
++                         Sigma = postCov)
++     # the ratio of posterior densities in the Metropolis acceptance probability
++     if (th<min(1,proposed-target)) {
++       i=i+1
++       sample[i,]<-theta_new
++       print(paste0("Sample Number ",i," ",Sys.time()))
++     }
++ 
++   }
++  return(sample)
++ }
+
+> print(paste0("Start Time ------------------------->  ",Sys.time()))
+[1] "Start Time ------------------------->  2023-05-16 03:28:24"
+
+> MCMC_post_samples <- RWMSampler(logPostFunc = logPossion,
++                                 nDraws = nDraws,
++                                   c=c,
++                                   y = y,
++                                   x = x,
++                                   mu = posteriorMode,
++                                   Sigma = postCov)
+[1] "Sample Number 2 2023-05-16 03:28:24"
+[1] "Sample Number 3 2023-05-16 03:28:27"
+[1] "Sample Number 4 2023-05-16 03:28:28"
+[1] "Sample Number 5 2023-05-16 03:29:04"
+[1] "Sample Number 6 2023-05-16 03:33:11"
+[1] "Sample Number 7 2023-05-16 03:40:24"
+
+

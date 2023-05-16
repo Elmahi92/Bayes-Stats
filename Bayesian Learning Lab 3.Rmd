@@ -6,17 +6,21 @@ output: pdf_document
 ---
 
 ```{r setup, include=FALSE}
+set.seed(123456)
 knitr::opts_chunk$set(echo = TRUE)
 library(LaplacesDemon)
+library(mvtnorm)
+library(MASS)
 library(ggplot2)
 library(gridExtra)
+library(rstan)
 ```
 
 # Gibbs sampler for a normal model
 
-# A
+## Part A
 
-Implement (code!) a Gibbs sampler that simulates from the joint posterior $p(\mu,\sigma^2|lny_1,...,lnyn)$. The full conditional posteriors are given on the slides from Lecture 7. Evaluate the convergence of the Gibbs sampler by calculating the Inefficiency Factors (IFs) and by plotting the trajectories of the sampled Markov chains.
+Implement (code!) a Gibbs sampler that simulates from the joint posterior $p(\mu,\sigma^2|lny_1,...,lnyn)$. The full conditional posteriors are given on the slides from Lecture 7. Evaluate the convergence of the Gibbs sampler by calculating the Inefficiency Factors (IFs) and by plotting the trajectories of the sampled Markov chains. \
 
 We start by building our function using the Slides notes we can define the Normal Model with Conditionally conjugate prior as:
 $$
@@ -45,7 +49,8 @@ We start by defining the above variables in R, Note that as we have $p(lny_1,...
 ```{r Preparing the data set, echo=T}
 # we start by reading our dataset using the readRDS command in R
 df <- data.frame(x=readRDS("Precipitation.rds"))
-# in the task we looking at natural log of the daily precipitation lny1,lny2,lny3,...lnyn follows N(mu,sigma)
+# in the task we looking at natural log of the daily precipitation
+#lny1,lny2,lny3,...lnyn follows N(mu,sigma)
 # We add a new var called logx 
 df$logx<- log(df$x)
 sigma2_0<- var(df$logx)  # Sample var
@@ -62,7 +67,7 @@ gibbsDraws <- matrix(0,nDraws,2)
 ```
 
 Now we write a code to simulates from the joint posterior using Gibbs sampler.
-```{r Gibbs Sampler, echo=T}
+```{r Gibbs Sample, echo=T}
 ### From lec notes we can use this part of the code
 for (i in 1:nDraws){
   
@@ -77,7 +82,7 @@ for (i in 1:nDraws){
 }
 ```
 
-To Evaluate the convergence of the Gibbs sampler we calculate the Inefficiency Factors (IFs)$1+2 \sum_{k=1}^\infty \rho_k$ - where $\rho_k$ is the autocorrelation at lag k - and then we  plot the trajectories of the sampled Markov chains.
+To Evaluate the convergence of the Gibbs sampler we calculate the Inefficiency Factors (IFs) $1+2 \sum_{k=1}^\infty \rho_k$ - where $\rho_k$ is the autocorrelation at lag k - and then we  plot the trajectories of the sampled Markov chains.
 
 ```{r Gibbs plot, echo=FALSE,fig.keep='none'}
 a_Gibbs_mu <- acf(gibbsDraws[,1])
@@ -96,7 +101,8 @@ plot_df<- as.data.frame(cbind(1:nDraws,gibbsDraws))
 # Plot for Mu trajectories of the sampled Markov chains
 p1<-ggplot(plot_df,aes(x=V1))+geom_line(aes(y=V2), color='#FCA311', size=.8)+
   annotate(geom = "text", x = 500, y = 1.312,
-           label = paste0("Inefficiency Factor ",format(round(IF_Gibbs_mu, 3), nsmall = 3)))+
+           label = paste0("Inefficiency Factor ",format(round(IF_Gibbs_mu, 3),
+                                                        nsmall = 3)))+
   labs(title = 'Mu trajectories of the sampled Markov chains',
        x= 'nDraws', y='Mu')+ theme_classic()
 
@@ -106,24 +112,24 @@ p2<-ggplot(plot_df,aes(x=V1))+geom_line(aes(y=V3), color='#FCA311', size=.8)+
            label = paste0("Inefficiency Factor ",format(round(IF_Gibbs_sigma, 3), nsmall = 3)))+
   labs(title = 'Sigma2 trajectories of the sampled Markov chains',
        x= 'nDraws', y='Mu')+ theme_classic()
-
-
-p1+p2
+p1
+p2
 ```
 
-The graph above shows the convergence of the Gibbs sampler and the Inefficiency Factors, the IF tell us number of iterations needed to get an independent sample from the posterior distribution, as we can see $\mu$ and $\sigma^2$ have 0,6 and 5,7 IF respectively, which tell us a better the convergence of the Gibbs sampler for the $\sigma^2$
+The graph above shows the convergence of the Gibbs sampler and the Inefficiency Factors, the IF tell us number of iterations needed to get an independent sample from the posterior distribution, as we can see $\mu$ and $\sigma^2$ have 0,69 and 0,57 IF respectively, which tell us a better the convergence of the Gibbs sampler for the $\sigma^2$.
 
-# B
+## Part B
 
-Plot the following in one figure:
-1) a histogram or kernel density estimate of the daily precipitation $(y_1,...,y_n)$.
-2)The resulting posterior predictive density $p(\tilde y|y_1,...,y_n)$ using the simulated posterior draws from (a).How well does
-the posterior predictive density agree with this data?
+Plot the following in one figure: \
+1) a histogram or kernel density estimate of the daily precipitation $(y_1,...,y_n)$. \
+2)The resulting posterior predictive density $p(\tilde y|y_1,...,y_n)$ using the simulated posterior draws from (a). \
+How well does the posterior predictive density agree with this data? \
 
 To do we draw a sample from rnorm with mean and sd from the posterior results we got in (a)
 
-```{r hist and density plots, echo=FALSE}
-#  mean and Sd from the results of the Gibbs sampler plot_df$V2 represent mean and plot_df$V3 Var
+```{r hist and density plots, echo=FALSE,warning=FALSE}
+#  mean and Sd from the results of the Gibbs sampler 
+#plot_df$V2 represent mean and plot_df$V3 Var
 # The resulting posterior predictive density
 post_pred<- rnorm(1000, mean = plot_df$V2, sd = sqrt(plot_df$V3))
 y <- exp(post_pred)
@@ -134,10 +140,548 @@ y <- exp(post_pred)
 de_df<- data.frame(x=y)
 
 ggplot() +
-  geom_histogram(data=df,aes(x = x,y=..density..),linetype=1,fill='#14213D',bins = 20)+
-  geom_density(data=de_df,aes(x=y), color='#FCA311', size=1,fill='#FCA311',alpha=.5)+
+  geom_histogram(data=df,aes(x = x,y=..density..),linetype=1,
+                 fill='#14213D',bins = 20)+
+  geom_density(data=de_df,aes(x=y), color='#FCA311', size=1,
+               fill='#FCA311',alpha=.5)+
   labs(title = "Histogram of Daily Precipitation",
        subtitle = "Line of Posterior predictive density",
        x = "Precipitation",
        y = "Density") + xlim(0.1,50)+ theme_classic()
 ```
+
+# Metropolis Random Walk for Poisson regression
+
+## Part A
+
+Obtain the maximum likelihood estimator of $\beta$ in the Poisson regression model for the eBay data [Hint: glm.R, don't forget that glm() adds its own intercept so don't input the covariate Const]. Which covariates are significant?
+
+```{r loading data, echo=FALSE}
+#First we upload our data
+df1<- read.table("eBayNumberOfBidderData.dat",header = T)
+#We run a possion model using the function glm in r,
+#note that we exclude the intercept and we use family possion
+model <- glm(nBids ~ ., data = df1[,-2], family = poisson)
+summary(model)
+```
+
+The model reuslts shows the coefficients and their standard errors for each predictor. The "Estimate" shows the estimated effect of each predictor on the expected number of bids. A positive coefficient indicates that the predictor is associated with an increase in the expected number of bids, while a negative coefficient indicates a decrease. \
+The "Pr(>|z|)" column shows the p-value for each coefficient. If this value is less than 0.05, the coefficient is considered statistically significant.
+The model suggests that the variables *VerifyID, Sealed, LogBook, and MinBidShare* have a significant effect on the expected number of bids (p-value less that 0.01 (p<.01) at $\alpha=0.01$), while the others do not.
+
+## Part B
+
+Let's do a Bayesian analysis of the Poisson regression. Let the prior be $\beta \sim N(0,100 \ (X^TX)^{-1})$ ,where X is the n x p covariate matrix. This is a commonly used prior, which is called Zellner's g-prior. Assume frst that the posterior
+density is approximately multivariate normal:
+$$
+\begin{aligned}
+\beta|y &\sim N(\tilde\beta,J^{-1}_y(\tilde\beta))
+\end{aligned}
+$$
+
+where $\tilde\beta$ is the posterior mode and $J^{-1}_y(\tilde\beta)$ is the negative Hessian at the posterior mode. $\tilde\beta$ and $J^{-1}_y(\tilde\beta)$  can be obtained by numerical optimization (optim.R) exactly like you already did for the logistic regression in Lab 2 (but with the log posterior function replaced by the corresponding one for the Poisson model, which you have to code up.).
+
+```{r possion post, echo=FALSE}
+### Prior and data inputs ###
+Covs <- c(2:10) # Select which covariates/features to include
+standardize <- F # If TRUE, covariates/features are standardized to mean 0 and variance 1
+
+Nobs <- dim(df1)[1] # number of observations
+y <- df1$nBids # y=1 if the women is working, otherwise y=0.
+x <- as.matrix(df1[,Covs]) # Covs matrix 7*7
+Xnames <- colnames(x)
+# Standraizing the covs matrix
+if (standardize){
+  Index <- 2:(length(Covs)-1)
+  x[,Index] <- scale(x[,Index])
+}
+Npar <- dim(x)[2]
+#############################################################################
+# This is to add y variable as binary response and adding intercept,
+#for now it's not needed
+# for (ii in 1:Nobs){
+#   if (wat$quality[ii] > 5){
+#     y[ii] <- 1
+#   }
+# }
+# wat <- data.frame(intercept=rep(1,Nobs),wat) # add intercept
+############################################################################
+# Setting up the prior
+mu <- c(rep(0,Npar)) # Prior mean vector
+Sigma <- 100*solve(t(x)%*%x) # Prior covariance matrix
+
+# Functions that returns the log posterior for the logistic and
+#probit regression.
+# First input argument of this function must be the parameters we optimize on, 
+# i.e. the regression coefficients beta.
+
+logPossion <- function(beta,y,x,mu,Sigma){
+  logLik <- -sum(exp(x%*%beta)) + sum(y%*%(x%*%beta))# <--------------- 
+  #We change on this line
+  ###########################################################################
+  # The first term, -sum(exp(Xbeta)), calculates the sum of the exponential of 
+  # the linear predictor Xbeta over all observations. This term represents the
+  # log-likelihood contribution from the expected 
+  #counts in the Poisson distribution.
+  # The second term, sum(y(Xbeta)), calculates the sum of the 
+  #observed response variable
+  # y multiplied by the linear predictor Xbeta over all
+  #observations. This term represents 
+  # the log-likelihood contribution from
+  #the observed counts in the Poisson distribution.
+  # By subtracting the first term from the second term,
+  #we obtain the log-likelihood of 
+  # the Poisson regression model given the data 
+  #and the regression coefficients.
+  #if (abs(logLik) == Inf) logLik = -20000; 
+  # Likelihood is not finite, stear the optimizer away from here!
+  ############################################################################
+  if (abs(logLik) == Inf){
+    logLik <- -20000
+  }
+  logPrior <- dmvnorm(beta, mu, Sigma, log=TRUE)
+  
+  return(logLik + logPrior)
+}
+
+# Select the initial values for beta
+initVal <- matrix(0,1,Npar)
+
+# The argument control is a list of options to the
+#optimizer optim, where fnscale=-1 means that we minimize 
+# the negative log posterior. Hence, we maximize the log posterior.  
+OptimRes <- optim(initVal,
+                  logPossion,
+                  gr=NULL,
+                  y=y,
+                  x=x,
+                  mu=mu,
+                  Sigma=Sigma,
+                  method=c("BFGS"),
+                  control=list(fnscale=-1),
+                  hessian=TRUE)
+```
+
+```{r possion post res, echo=FALSE}
+# Printing the results to the screen
+names(OptimRes$par) <- Xnames # Naming the coefficient by covariates
+# Computing approximate standard deviations.
+approxPostStd <- sqrt(diag(solve(-OptimRes$hessian))) 
+
+names(approxPostStd) <- Xnames # Naming the coefficient by covariates
+print('The posterior mode is:')
+print(OptimRes$par)
+print('The Hessian Matrix:')
+print(OptimRes$hessian)
+print('The approximate posterior standard deviation is:')
+print(approxPostStd)
+```
+
+## Part C
+Let's simulate from the actual posterior of $\beta$ using the Metropolis algorithm and compare the results with the approximate results in b). \
+Program a general function that uses the Metropolis algorithm to generate random draws from an arbitrary posterior density. In order to show that it is a general function for any model, we denote the vector of model parameters by $\theta$. Let the proposal density be the multivariate normal density mentioned in Lecture 8 (random walk Metropolis):
+$$
+\begin{aligned}
+\theta_p|\theta^{i-1} &\sim N(\theta^{i-1},c.\Sigma)
+\end{aligned}
+$$
+Where $\Sigma = J^{-1}_y( \tilde\beta)$ was obtained in b). The value c is a tuning parameter and should be an input to your Metropolis function. The user of your Metropolis function should be able to supply her own posterior density function, not necessarily for the Poisson regression, and still be able to use your Metropolis function. \
+* Note that* on how to How to code up the Random Walk Metropolis Algorithm in R:
+One of the input arguments of our *RWMSampler* function is *logPostFunc*. *logPostFunc* is a function object that computes the log posterior density at any value of the parameter vector. \
+This is needed when we compute the acceptance probability of the Metropolis
+algorithm. from (q2 a) we program the log posterior density, since logs are more stable and avoids problems with too small or large numbers (overflow). The ratio of posterior densities in the Metropolis acceptance probability can be written as:
+
+$$
+\begin{aligned}
+\frac{p(\theta_p|y)}{p(\theta^{i-1}|y)} &= exp(log\ p(\theta_p|y) -log\ p(\theta^{i-1}|y))
+\end{aligned}
+$$
+The first argument our (log) posterior function is theta (theta_old,theta_new), the vector of parameters for which the posterior density is evaluated. You can of course use some other name for the variable, but it must be the first argument of your posterior density function.
+
+### Function RWMSampler
+
+```{r RWMSampler, echo=TRUE}
+RWMSampler<- function(logPostFunc,nDraws,c,y,x,mu,Sigma){
+  # First we buld our data frame of samples
+  sample <- data.frame(matrix(nrow = nDraws, ncol = ncol(x)))
+  colnames(sample) <- colnames(x)
+  # The inital sample value c here represent a tuning parameter
+  sample[1,] <- mvrnorm(1, posteriorMode, c*postCov)
+  # Now we implement the Metropolis-Hastings
+  #in which we generate samples from the proposal distribution in this case 
+  # We look at the results of the first sample
+  #as theta_i-1 pluged in mvnorm to get theta_i and the we use the values in
+  # our proposed logPostFunc
+  i=1
+  while (i < nDraws) {
+    theta_old<-as.numeric(sample[i,])
+    theta_new<-mvrnorm(1,theta_old,c*postCov)
+  # We define th our accept/reject threshold 
+    th<-runif(1,0,1)
+  # now we find the value of the target/proposed distribution
+    proposed<- logPostFunc(theta_new,y = y,
+                          x = x,
+                          mu = posteriorMode,
+                          Sigma = postCov)
+    target<- logPostFunc(theta_old,y = y,
+                        x = x,
+                        mu = posteriorMode,
+                        Sigma = postCov)
+    # the ratio of posterior densities in the Metropolis acceptance probability
+    if (th<min(1,exp(proposed-target))) {
+      i=i+1
+      sample[i,]<-theta_new
+    }
+  }
+ return(sample)
+}
+```
+
+* Now, use your new Metropolis function to sample from the posterior of $\beta$ in the Poisson regression for the eBay dataset.
+```{r sample from the posterior function, echo=TRUE}
+nDraws=10000
+c=.5
+posteriorMode=OptimRes$par
+postCov=solve(-OptimRes$hessian)
+res <- RWMSampler(logPostFunc = logPossion,
+                                nDraws = nDraws,
+                                  c=c,
+                                  y = y,
+                                  x = x,
+                                  mu = posteriorMode,
+                                  Sigma = postCov)
+```
+
+* Assess MCMC convergence by graphical methods.
+
+```{r sample from the posterior, echo=FALSE}
+names<-colnames(res)
+p_fun<- function(coln){
+  plt <- ggplot(res,aes_string(x = coln)) +
+    geom_histogram(aes(y=..density..),linetype=1,fill='#14213D',bins = 20)+
+    geom_density(alpha=.2,color="#FCA311",size=1,fill="#FCA311")
+  plt
+}
+
+plot(arrangeGrob(grobs = lapply(names, p_fun)))
+```
+
+## Part D
+Use the MCMC draws from c) to simulate from the predictive distribution of the number of bidders in a new auction with the characteristics below. Plot the predictive distribution. What is the probability of no bidders in this new auction? \
+* PowerSeller = 1 \
+* VerifyID = 0 \
+* Sealed = 1 \
+* MinBlem = 0 \
+* MajBlem = 1 \
+* LargNeg = 0 \
+* LogBook = 1.2 \
+* MinBidShare = 0.8 \
+
+```{r predictive sampe, echo=TRUE}
+#First we estimate the betas from our RWMSampler function 
+betas<- as.matrix(res)
+# Input data 
+x_new <- as.matrix(c(1,1,0,1,0,1,0,1.2,0.8))
+# calculating the probability
+prob<-data.frame(x=exp(betas  %*% x_new))
+```
+
+Plotting the predictive distribution. What is the probability of no bidders in this new auction?
+
+```{r predictive plot, echo=FALSE}
+ggplot(prob,aes(x = x)) +
+  geom_histogram(aes(y=..density..),linetype=1,fill='#14213D',bins = 20)+
+  geom_density(alpha=.2,color="#FCA311",size=1,fill="#FCA311")+
+  annotate(geom = "text", x = .8, y = 5,
+           label = paste0("The probability of no 
+                          bidders in this new auction =",
+                          format(round(mean(x), 3), nsmall = 3)))+
+  labs(x = 'Probabilities', y = 'density',
+           title ='Plot of the predictive distribution')
+```
+
+
+# Time series models in Stan
+
+## Part A
+
+Write a function in R that simulates data from the AR(1)-process: \
+$x_t= \mu+\phi(x_{t-1}-\mu)+\epsilon_t\ , \epsilon_t \sim N(0,+\sigma^2)$ for given values of $\mu$, $\phi$ and $\sigma^2$. \
+Start the process at x1 = $\mu$ and then simulate values for $x_t$ for t= 1,2,3,..., T and return the vector x1:T containing all time points. \
+Use $\mu$= 13; $\sigma^2$ = 3 and T = 300 and look at some different realizations (simulations) of $x_{1:t}$ for values of $\phi$ between -1 and 1 (this is the interval of  $\phi$ where the AR(1)-process is stationary). Include a plot of at least one realization in the report.\
+What effect does the value of $\phi$ have on $x_{1:t}$?
+
+```{r AR function, echo=TRUE}
+ar_process<- function(phi,mu, sigma,t){
+  x_t<-c()
+  x_t[1]<-mu
+  for(i in 2:t){
+    e<- rnorm(1,0,sqrt(3))
+    x_t[i]<-mu+(phi*(x_t[i-1]-mu))+e
+  }
+  return(x_t)
+}
+```
+
+Now we Include a plot of at least one realization in the report. What effect does the value of $\phi$ have on $x_{1:t}$?
+
+```{r AR function results, echo=FALSE}
+phi<-seq(-1,1,by=.5)
+res<- list()
+for (i in phi) {
+  res1 <- ar_process(i, 13, 3, 300)
+  res[[paste0("Phi_", i)]] <- res1
+}
+
+res<- data.frame(res)
+names<-colnames(res)
+p_fun<- function(coln){
+  plt <- ggplot(res,aes(x = 1:300)) +
+    geom_line(aes_string(y = coln),color='#FCA311', size=.8)+
+  labs(title = coln,
+       x= 'Simulations', y='Phi Value')+ theme_classic()
+  plt
+}
+
+plot(arrangeGrob(grobs = lapply(names, p_fun)))
+```
+In the graph above, the value of phi greatly impacts the convergence of the sample chain. When phi is less than 0, it can lead to instability and hinder the convergence to a stationary distribution. This instability is evident when the chains appear to wander around or exhibit erratic behavior, indicating that the sampler has not yet converged. \
+However, it is notable that the chains demonstrate good mixing, meaning they efficiently explore the parameter space and cover a wide range of plausible values.
+To achieve convergence, it may be necessary to increase the number of iterations. \
+*It is important to note that when phi is equal to 1, the convergence appears to be reached more quickly compared to when phi is less than 0.*
+
+## Part B
+Use your function from a) to simulate two AR(1)-processes, $x_{1:T}$ with $\phi$ = 0.2 and $y_{1:T}$ with $\phi$ = 0.95. Now, treat your simulated vectors as synthetic data, and treat the values of , $\mu$ and $\sigma^2$ as unknown parameters. \
+Implement Stancode that samples from the posterior of the three parameters, using suitable non-informative priors of your choice. \
+
+*Notes from: (https://mc-stan.org/docs/stan-users-guide/autoregressive.html)*.
+We have A first-order autoregressive model (AR(1)) with normal noise takes each point $y_n$ in a sequence $y$ to be generated according to:
+$$
+\begin{aligned}
+y_n &\sim N(\alpha+\beta y_{n-i},\sigma)
+\end{aligned}
+$$
+That is, the expected value of $y_n$ is $\alpha+\beta y_{n-i}$, with  noise scaled as $\sigma$. \
+With improper flat priors on the regression coefficients $\alpha$ and $\beta$ and on the positively-constrained noise scale ($\sigma$), the Stan program for the AR(1) model is as follows:
+
+```{r stan1, echo=TRUE,eval=FALSE}
+data {
+  int<lower=0> N;
+  vector[N] y;
+}
+parameters {
+  real alpha;
+  real beta;
+  real<lower=0> sigma;
+}
+model {
+  for (n in 2:N) {
+    y[n] ~ normal(alpha + beta * y[n-1], sigma);
+  }
+}
+```
+
+Adding the the Slicing for efficiency in which we silce the vector we can rewrite the above as:
+
+```{r stan2, echo=TRUE,eval=FALSE}
+data {
+  int<lower=0> N;
+  vector[N] y;
+}
+parameters {
+  real alpha;
+  real beta;
+  real<lower=0> sigma;
+}
+model {
+   y[2:N] ~ normal(alpha + beta * y[1:(N - 1)], sigma);
+}
+```
+
+*From lec notes we have Gibbs sampling for AR process:* \
+
+If we have AP(p) process:
+$$
+\begin{aligned}
+x_t = \mu+\phi_1(x_{t-1}-\mu)+...+\phi_p(x_{t-p}-\mu)+\epsilon, \ \epsilon_t \sim N(0,\sigma^2) \\
+\end{aligned}
+$$
+
+let $\phi = (\phi_1,...,\phi_p)'$ , we have prior:
+
+$$
+\begin{aligned}
+\mu &\sim Normal \\
+\phi &\sim Multivariate\ Normal \\
+\sigma^2 &\sim Scaled\ inverse\ \chi
+\end{aligned}
+$$
+And the posterior can be simulated by Gibbs sampling:
+
+$$
+\begin{aligned}
+\mu|\phi \ \sigma^2 &\sim Normal \\
+\phi| \mu\ \sigma^2 &\sim Multivariate\ Normal \\
+\sigma^2| \mu \ \phi &\sim Scaled\ inverse\ \chi
+\end{aligned}
+$$
+
+### StanModel
+
+```{r stan function, echo=TRUE}
+StanModel = '
+data {
+  int<lower=0> N; // Number of observations
+  vector[N] y; 
+}
+parameters {
+  real mu;
+  real<lower=0> sigma2;
+  real<lower=-1, upper=1> phi; 
+  //To enforce the estimation of a 
+  //stationary AR(1) process, the slope 
+  //coefficient beta may be constrained with bounds as follows.
+}
+model {
+  mu ~ normal(0,100); // Normal with mean 0, st.dev. 100
+  sigma2 ~ scaled_inv_chi_square(1,2); // Scaled-inv-chi2 with nu 1,sigma 2
+  y[2:N] ~ normal(mu + phi * y[1:(N - 1)], sqrt(sigma2^2));
+}'
+```
+
+### Model results
+
+#### Part i
+
+Report the posterior mean, 95% credible intervals and the number of effective posterior samples for the three inferred parameters for each of the simulated AR(1)-process. Are you able to estimate the true values? \
+
+Giving $x_{1:T}$ with $\phi$ = 0.2 and $y_{1:T}$ with $\phi$ = 0.95, the model results can be shown as below.
+
+1- *For $x_{1:T}$ with $\phi$ = 0.2*
+
+```{r stan results x, echo=TRUE}
+# Simulate of x
+ar_x<-ar_process(.2, 13, 3, 300)
+
+#From lec notes we have the stanmodel function defined as 
+y=ar_x
+N=length(y)
+
+data <- list(N=N, y=y)
+warmup <- 1000
+niter <- 2000
+fitx <- stan(model_code=StanModel,data=data,warmup=warmup,iter=niter,chains=4)
+# Print the fitted model
+print(fitx,digits_summary=3)
+samples_x <-extract(fitx, pars = c("mu", "sigma2", "phi"))
+# Compute the mean
+mean_x <- sapply(samples_x, mean)
+# 95% credible intervals
+intv_x <- sapply(samples_x,function(samples) quantile(samples,c(0.025, 0.975)))
+# effective posterior samples
+eff_samp_x <- summary(fitx)$summary[1:3,"n_eff"]
+
+result <- data.frame( Mean = mean_x,
+                     Credible_Interval_Lower = intv_x[1, ],
+                     Credible_Interval_Upper = intv_x[2, ],
+                     Effective_Samples = eff_samp_x)
+print(result)
+```
+
+Based on the table above, the simulations performed using the Metropolis algorithm have provided estimates for the parameters $\mu$, $\sigma$, and $\phi$. \
+The estimated values are found to be approximately 11.6, 1.6, and 0.11, respectively. \
+These estimates are close to the true values used to simulate the AR(1) process, indicating that the sampling algorithm has been effective in capturing the underlying parameter values. This suggests that the simulation has successfully captured the characteristics of the data and has produced reliable estimates for the parameters of interest. \
+
+2- *For $y_{1:T}$ with $\phi$ = 0.95*
+
+```{r stan results y, echo=TRUE}
+# Simulate of y
+ar_y<-ar_process(.95, 13, 3, 300)
+
+#From lec notes we have the stanmodel function defined as 
+y=ar_y
+N=length(y)
+
+data <- list(N=N, y=y)
+warmup <- 1000
+niter <- 2000
+fity <- stan(model_code=StanModel,data=data, warmup=warmup,iter=niter,chains=4)
+# Print the fitted model
+print(fity,digits_summary=3)
+samples_y <-extract(fity, pars = c("mu", "sigma2", "phi"))
+# Compute the mean
+mean_y <- sapply(samples_y, mean)
+# 95% credible intervals
+intv_y <- sapply(samples_y,function(samples) quantile(samples,c(0.025, 0.975)))
+# effective posterior samples
+eff_samp_y <- summary(fitx)$summary[1:3,"n_eff"]
+
+result <- data.frame( Mean = mean_y,
+                     Credible_Interval_Lower = intv_y[1, ],
+                     Credible_Interval_Upper = intv_y[2, ],
+                     Effective_Samples = eff_samp_y)
+print(result)
+```
+
+In the table above, it is observed that the second simulated AR(1) process exhibits some differences compared to the first one. While the estimates for $\sigma$ and $\phi$ are relatively accurate, the estimate for $\mu$ appears to deviate slightly from the true value. This discrepancy suggests that the sampling algorithm may have encountered challenges in accurately capturing the true mean parameter. \
+
+There could be several reasons for this discrepancy. It is possible that the non-informative priors chosen for the parameters might not have been appropriate, leading to a bias in the estimation of $\mu$. Additionally, the specific characteristics of the second AR(1) process, such as its underlying dynamics and data distribution, might have posed challenges for the sampling algorithm in accurately estimating $\mu$. 
+
+
+#### Part ii
+
+For each of the two data sets, evaluate the convergence of the samplers and plot the joint posterior of $\mu$ and $\phi$. Comments?
+
+#### First sample: 
+
+*For $x_{1:T}$ with $\phi$ = 0.2*
+
+```{r plotsx, echo=TRUE}
+df_x <-as.data.frame(extract(fitx, pars = c("mu", "phi")))
+
+names<-colnames(df_x)
+ln<-length(df_x[,1])
+p_fun<- function(coln){
+  plt <- ggplot(df_x,aes(x = 1:ln)) +
+    geom_line(aes_string(y = coln),color='#FCA311', size=.8)+
+    labs(title = coln,
+         x= 'Simulations', y='Phi Value')+ theme_classic()
+  plt
+}
+
+plot(arrangeGrob(grobs = lapply(names, p_fun)))
+```
+
+#### Second sample: 
+
+*For $y_{1:T}$ with $\phi$ = 0.95*
+
+```{r plotsy, echo=TRUE}
+df_y <-as.data.frame(extract(fity, pars = c("mu", "phi")))
+
+names<-colnames(df_y)
+ln<-length(df_y[,1])
+p_fun<- function(coln){
+  plt <- ggplot(df_y,aes(x = 1:ln)) +
+    geom_line(aes_string(y = coln),color='#FCA311', size=.8)+
+    labs(title = coln,
+         x= 'Simulations', y='Phi Value')+ theme_classic()
+  plt
+}
+
+plot(arrangeGrob(grobs = lapply(names, p_fun)))
+```
+
+Examining the above results, it is evident that the posterior estimates for both $\mu$ and $\phi$ exhibit convergence for each of the two data sets. This convergence indicates that the Markov chain has explored the parameter space sufficiently and reached a stable distribution.
+
+
+# References:
+
+1- Stan Development Team. (2021). Stan user’s guide. Retrieved from https://mc-stan.org/docs/2_27/stan-users-guide/index.html. \
+2- Bertil Wegmann (2023). Bayesian Learning [Lecture notes]. 732A73, Department of Computer and Information Science,LiU University.
+
+# Code Appendix
+
+```{r,ref.label=knitr::all_labels(),echo=TRUE,eval=FALSE}
+```
+
