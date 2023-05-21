@@ -18,11 +18,26 @@ library(gridExtra)
 
 ## Linear and polynomial regression
 
+The dataset TempLambohov.txt contains daily average temperatures (in degree Celcius) at Lambohov, Linköping over the course of the year 2019. The response variable is temp and the covariate is
+
+$$
+\begin{aligned}
+time &= \frac{the \ number\ of\ days\ since\ the\ beginning\ of\ the\ year}{365}
+\end{aligned}
+$$
+A Bayesian analysis of the following quadratic regression model is to be performed:
+$$
+\begin{aligned}
+temp &= \beta_0 + \beta_1.time \ + e,\ e\sim N(0,\sigma^2)
+\end{aligned}
+$$
+
+
 To answer this question a conjugate prior for the linear regression model will be used in which: 
 The joint prior for $\beta \ and\  \sigma^2$:
 $$
 \begin{aligned}
-\beta|\sigma^2 \sim \ \mathcal{N}(\mu_0,\sigma^2\Omega{_0}^{-1})\\ \sigma^2 \sim Inv-\chi^2(v_0,\sigma^2)
+\beta|\sigma^2 &\sim \ \mathcal{N}(\mu_0,\sigma^2\Omega{_0}^{-1})\\ \sigma^2 &\sim Inv-\chi^2(v_0,\sigma^2)
 \end{aligned}
 $$
 While the posterior:
@@ -40,7 +55,7 @@ $$
 
 
 First we start by reading the files and then we Create the covariate_time vaiable as (the number of days sinvce the beginning of the year / 365)
-```{r data}
+```{r data, echo=TRUE}
 #reading the files 
 df<-read_xlsx("Linkoping2022.xlsx")
 #Creating the covariate_time vaiable as 
@@ -56,11 +71,15 @@ df$cov_tm<-x/365
 ```
 
 
-## A
+# A
+
+Use the conjugate prior for the linear regression model. The prior hyperparameters $\mu_0, \Omega_0, v_0, \sigma^2_0$ shall be set to sensible values. Start with $\mu_0=(-10,100,-100)^T, \Omega_0=0.02.I_3, v_0=3, \sigma^2_0=2$. Check if this prior agrees with your prior opinions by simulating draws from the joint prior of all parameters and for every draw compute the regression curve. This gives a collection of regression curves; one for each draw from the prior. Does the collection of curves look reasonable? If not, change the prior hyperparameters until the collection of  prior regression curves agrees with your prior beliefs about the regression curve. [Hint: R package mvtnorm can be used and your $inv-\chi^2$ simulator of random draws from Lab 1.]
+
+
 
 We assume to use a conjugate prior from the linear regression in Lec 5 , we have been given the prior hyperparamteres as follow:
 
-```{r par}
+```{r par, echo=TRUE}
 #We assume to use a conjugate prior from 
 #the linear regression in Lec 5 , 
 #we have been given the prior hyperparamteres as follow:
@@ -77,7 +96,7 @@ We have the joint prior for beta and segma2 defined as $\beta|\sigma^2\sim\mathc
 
 First we draw our random samaple from inv-chi2 using the below defined function from Lec 3 slide 5
 
-```{r draws, echo=FALSE}
+```{r draws, echo=TRUE}
 # Step 1: Draw X ~ χ²(n - 1)
 draw_chi_sq <- function(n) {
   return(rchisq(1, df = n - 1))
@@ -105,7 +124,7 @@ sigma2<-segma_estimation(n, mu_0, segma2_0, ndraws)
 Now we estimate the betas values using the formula $\beta|\sigma^2\sim\mathcal{N}(\mu_0,\sigma^2\Omega_{_0}^{-1})$ and we fit the regression based ontemp = beta0 + beta1 time + beta 2 time^2 + erorr
 
 *Note  we have our error follows the normal distrbution by 0 and $\sigma^2$
-```{r sigma estimates ,echo=FALSE}
+```{r sigma estimates ,echo=TRUE}
 for (i in 1:length(sigma2)) {
   e<- rnorm(1,0,sigma2[i])
   res<-rmvnorm(1,mu_0,sigma2[i]*omega_0)
@@ -115,7 +134,7 @@ for (i in 1:length(sigma2)) {
 ```
 
 After we done with the draws now for every draw compute the regression curve
-```{r plot,echo=FALSE,fig.align='center'}
+```{r plot,echo=TRUE,fig.align='center'}
 # Define a vector of colors
 colors <-c("#FCA311", "#00FF00", "#0000FF", "#FFFF00", "#00FFFF",
             "#FF00FF", "#800000", "#008000", "#000080", "#808000",
@@ -139,7 +158,7 @@ plt
 
 Comparing the above chart with our  prior beliefs which we can see by running the polynomial model using the *lm* function in R with df = 2 we can see the fitted regression line with to some extend follow our regression line when $\sigma^2$ is equal to *1.037*.
 
-```{r ploy,echo=FALSE,fig.align='center'}
+```{r ploy,echo=TRUE,fig.align='center'}
 degree <- 2  # Set the degree of the polynomial
 x= df$cov_tm
 y= df$temp
@@ -161,7 +180,7 @@ summary(model)
 ```
 Now we draw simulations using the modified $\mu_0$ from the model results we have 
 
-```{r modefid mu,echo=FALSE,fig.align='center'}
+```{r modefid mu,echo=TRUE,fig.align='center'}
 mu_news= as.matrix(c(7.3,83.1,-78.3),ncol=3)
 segma2_new=10
 sigma2<-segma_estimation(n,mu_news, segma2_new, ndraws)
@@ -194,7 +213,11 @@ plt <- plt +
 plt
 ```
 
-## B
+# B
+
+Write a function that simulate draws from the joint posterior distribution of $\beta_0, \beta_1, \beta_2,\sigma^2$.
+i- Plot a histogram for each marginal posterior of the parameters.
+ii- Make a scatter plot of the temperature data and overlay a curve for the posterior median of the regression function $f(time)=E[temp|time]=\beta_0+\beta_1.time+\beta_2.time^2$, i.e. the median of $f(time)$ is computed for every value of time. In addition, overlay curves for the 95% equal tail posterior probability intervals of $f(time)$, i.e. the 2.5 and 97.5 posterior percentiles of $f(time)$ is computed for every value of time. Does the posterior probability intervals contain most of the data points? Should they?
 
 As we want to estimate the uncertainty in the model parameters. Simulating from the joint posterior allows us to obtain a set of plausible values for all the parameters in the model, taking into account the observed data and prior information.
 to do so:
@@ -223,7 +246,7 @@ And then we find the marginal posterior of $\beta$:
 $$\beta|y\sim t_n-k(\hat\beta,s^2(X´X)^-1)$$
 There for to draw a sample from the joint posterior distribution of $\beta_0,\beta_2,\beta_3\ and \ \sigma^2$: 
 we need first to calculate the value of $\hat\beta= (X´X)^-1X´y$
-```{r beta_hat,echo=FALSE}
+```{r beta_hat,echo=TRUE}
 y<-as.matrix(df$temp)
 x<-as.matrix(cbind(1,df$cov_tm,df$cov_tm^2))
 n<- length(y)
@@ -234,7 +257,7 @@ s2<-(1/(n-k))*t((y-(x%*%beta_ht)))%*%(y-(x%*%beta_ht))
 
 Then we calculate the values of $\Omega_n \ ,v_n \ ,\mu_n \ and \ \sigma{^2}{_n}$ we use the same format as in eq 1 
 
-```{r s2,echo=FALSE}
+```{r s2,echo=TRUE}
 omega_n <- t(x) %*% x+omega_0
 df_<-(n-k)
 lmbda_<-s2
@@ -246,15 +269,17 @@ sigma2_n <- (v_0 * segma2_0 + (t(y) %*% y + t(mu_0) %*% omega_0
 
 Now we generate the valuse of $\beta$ from $t_{n-k}(\hat\beta,\ s^2(X´X)^{-1} )$ using $\mu_n$ as our delta and $\sigma^2_n$ as sigma. in R we use function *mvtnorm::rmvt*
 
-```{r res,echo=FALSE}
+```{r res,echo=TRUE}
 res<-data.frame(mvtnorm::rmvt(10000,delta=mu_n,df=df_,sigma=sigma2_n[1,1]*solve(t(x)%*%x)))
 ```
 
 i/ Now we Plot a histogram for each marginal posterior of the parameters $\beta's$
 
-```{r marginal posterior,echo=FALSE}
-#We store the value of betas in a df and then we use this data to plot the histogarm of the betas
-res<-data.frame(mvtnorm::rmvt(10000,delta=mu_n,df=df_,sigma=sigma2_n[1,1]*solve(t(x)%*%x)))
+```{r marginal posterior,echo=TRUE}
+#We store the value of betas in a df and 
+#then we use this data to plot the histogarm of the betas
+res<-data.frame(mvtnorm::rmvt(10000,delta=mu_n,
+                              df=df_,sigma=sigma2_n[1,1]*solve(t(x)%*%x)))
 
 
 names(res)<-c('b_0','b_1','b_2')
@@ -288,7 +313,7 @@ ii/ Make a scatter plot of the temperature data and overlay a curve for the post
 $f(time)\ = \ E[temp|time]\ =\ \beta_0+\beta_1.time+\beta_2.time^2$.
 First we need to calculate the $f(time)$ by using the results from i we can define:
 
-```{r temperature data,echo=FALSE}
+```{r temperature data,echo=TRUE}
 # Calculating the median value point
 median=as.matrix(apply(res, 2, median))
 
@@ -309,11 +334,10 @@ for(i in 1:nrow(x)){
 }
 ```
 
-### b
 
 by using the results from above we can fit the curve line for the posterior median and 95% CI on the scatter plot of the temperature data as below:
 
-```{r curve line for the posterior,echo=FALSE}
+```{r curve line for the posterior,echo=TRUE}
 # Storing the data in one data frame
 
 plt_df=data.frame(x=df$cov_tm,y=df$temp,med=posterior_median)
@@ -324,17 +348,20 @@ plt_df= cbind(plt_df,prd_int)
 plt <- ggplot(plt_df, aes(x = x, y = y)) +
   geom_point(color = "#14213D", size = 1.5)+
   geom_line(aes(y = med), color = "#F28E2B", linetype = 1,size=1.5)+
-  geom_ribbon(aes(ymin = CI_lower, ymax = CI_upper), alpha = 0.5,fill = "#EDC948")+
+  geom_ribbon(aes(ymin = CI_lower, ymax = CI_upper)
+              , alpha = 0.5,fill = "#EDC948")+
   labs(x = 'Time', y = 'Temp'
        ,title ='The posterior median Curve and 95% CI') 
 plt
 ```
-### c
+
+# C
+It is of interest to locate the time with the highest expected temperature (i.e. the time where $f(time)$ is maximal). Let's call this value $\bar x$. Use the simulated draws in (b) to simulate from the posterior distribution of $\bar x$. [Hint: the regression curve is a quadratic polynomial. Given each posterior draw of $\beta_0, \beta_1, \beta_2$, you can find a simple formula for $\bar x$.]
 
 To simulate from the posterior distribution of the highest expected temperature $\bar X$ we can use the all possible 
 prediction values that we generated in the task before, then by taking the max value we get the point point wise highest expected temperature over time:
 
-```{r highest expected temperature,echo=FALSE}
+```{r highest expected temperature,echo=TRUE}
 # Storing the data in one data frame
 #Initite the storing vector
 het<-c()
@@ -354,15 +381,21 @@ plt <- ggplot(plt_df, aes(x = x, y = y)) +
   geom_point(color = "#14213D", size = 1.5)+
   geom_line(aes(y = het), color = "#59A14F", linetype = 1,size=1.5)+
   geom_line(aes(y = med), color = "#F28E2B", linetype = 1,size=1.5)+
-  geom_ribbon(aes(ymin = CI_lower, ymax = CI_upper), alpha = 0.5,fill = "#EDC948")+
-  labs(x = 'Time', y = 'Temp',title ='The posterior median Curve, 95% CI and Highest Expected Temperature'
+  geom_ribbon(aes(ymin = CI_lower, ymax = CI_upper)
+              , alpha = 0.5,fill = "#EDC948")+
+  labs(x = 'Time', y = 'Temp'
+       ,title ='The posterior median Curve, 
+       95% CI and Highest Expected Temperature'
        ,color = "Line Legend") +
-  scale_color_manual(values = c("#14213D","#59A14F","#F28E2B","#EDC948"), labels = c("1","2","3","4"))+
+  scale_color_manual(values = c("#14213D","#59A14F","#F28E2B","#EDC948")
+                     , labels = c("1","2","3","4"))+
   theme(legend.position="bottom")
 plt
 ```
 
-### D
+# D
+Say now that you want to estimate a polynomial regression of order 8, but you suspect that higher order terms may not be needed, and you worry about overfitting the data. Suggest a suitable prior that mitigates this potential problem. You do not need to compute the posterior. Just write down your prior. [Hint: the task is to specify $\mu_0$ and $\Omega_0$ in a suitable way.]
+
 
 To mitigate the problem of over fitting when estimating a polynomial resgression of order 10 without being worry of the over fitting, one can use Smoothness/Shrinkage/Regularization of the prior by introducing $\lambda$ a penalization parameter (See lec 5 Slide 9 Lasso) in this method we have:
 
@@ -419,6 +452,11 @@ $$
 
 ## Posterior approximation for classifcation with logistic regression
 
+![Alt Text](q3.png)
+
+![Alt Text](q3a.png)
+
+
 
 ### a
 
@@ -426,8 +464,9 @@ Firstly we want to calculate the value of $\tilde \beta$  the posterior mode and
 Using  code snippets from my demo of logistic regression in Lecture 6.
 First we want to calculate the vale of $\tilde \beta$ and $J(\tilde \beta)=-\frac{\partial^2\ lnp(\beta|y)}{\partial \beta \partial\beta^T}|_{\beta=\tilde\beta}$ by using the *optim*, Note that we have $\tau= 2$ and $\beta \sim N(0,\frac{1}{\lambda}I)$.
 
-```{r beta and hessian,echo=FALSE}
-# First we want to calculate the vale of beta and the Jacopiang inv of beta by using thge optim function and the code from the lec notes
+```{r beta and hessian,echo=TRUE}
+# First we want to calculate the vale of beta and the Jacopiang
+#inv of beta by using thge optim function and the code from the lec notes
 # Note that we have tau = 2 and prior beta follows N(0,tau^2I)
 
 ### Select Logistic or Probit regression and install packages ###
@@ -435,7 +474,8 @@ Probit <- 0
 
 ### Prior and data inputs ###
 Covs <- c(2:8) # Select which covariates/features to include
-standardize <- F # If TRUE, covariates/features are standardized to mean 0 and variance 1
+standardize <- F # If TRUE,covariates/features are standardized
+                   #to mean 0 and variance 1
 lambda <- 4 # scaling factor for the prior of beta in our case tau = 2
 
 # Loading out data set
@@ -451,15 +491,16 @@ if (standardize){
 }
 Npar <- dim(X)[2]
 
-#############################################################################################
-# This is to add y variable as binary response and adding intercept, for now it's not needed
+##############################################################################
+# This is to add y variable as binary response and adding 
+#intercept, for now it's not needed
 # for (ii in 1:Nobs){
 #   if (wat$quality[ii] > 5){
 #     y[ii] <- 1
 #   }
 # }
 # wat <- data.frame(intercept=rep(1,Nobs),wat) # add intercept
-#############################################################################################3
+#############################################################################
 
 # Setting up the prior
 mu <- as.matrix(rep(0,Npar)) # Prior mean vector
@@ -472,7 +513,8 @@ Sigma <- (1/lambda)*diag(Npar) # Prior covariance matrix
 LogPostLogistic <- function(betas,y,X,mu,Sigma){
   linPred <- X%*%betas;
   logLik <- sum( linPred*y - log(1 + exp(linPred)) );
-  #if (abs(logLik) == Inf) logLik = -20000; # Likelihood is not finite, stear the optimizer away from here!
+  #if (abs(logLik) == Inf) logLik = -20000; # Likelihood is
+  #not finite, stear the optimizer away from here!
   logPrior <- dmvnorm(betas, mu, Sigma, log=TRUE);
   
   return(logLik + logPrior)
@@ -481,7 +523,8 @@ LogPostLogistic <- function(betas,y,X,mu,Sigma){
 LogPostProbit <- function(betas,y,X,mu,Sigma){
   linPred <- X%*%betas;
   SmallVal <- .Machine$double.xmin
-  logLik <- sum(y*log(pnorm(linPred)+SmallVal) + (1-y)*log(1-pnorm(linPred)+SmallVal) )
+  logLik <- sum(y*log(pnorm(linPred)+SmallVal) + 
+                  (1-y)*log(1-pnorm(linPred)+SmallVal) )
   logPrior <- dmvnorm(betas, mu, Sigma, log=TRUE);
   return(logLik + logPrior)
 }
@@ -495,13 +538,15 @@ if (Probit==1){
   logPost = LogPostLogistic;
 }
 
-# The argument control is a list of options to the optimizer optim, where fnscale=-1 means that we minimize 
+# The argument control is a list of options to 
+#the optimizer optim, where fnscale=-1 means that we minimize 
 # the negative log posterior. Hence, we maximize the log posterior.  
 OptimRes <- optim(initVal,logPost,gr=NULL,y,X,mu,Sigma,method=c("BFGS"),control=list(fnscale=-1),hessian=TRUE)
 
 # Printing the results to the screen
 names(OptimRes$par) <- Xnames # Naming the coefficient by covariates
-approxPostStd <- sqrt(diag(solve(-OptimRes$hessian))) # Computing approximate standard deviations.
+# Computing approximate standard deviations.
+approxPostStd <- sqrt(diag(solve(-OptimRes$hessian))) 
 names(approxPostStd) <- Xnames # Naming the coefficient by covariates
 print('The posterior mode is:')
 print(OptimRes$par)
@@ -511,7 +556,7 @@ print('The approximate posterior standard deviation is:')
 print(approxPostStd)
 ```
 Now we compare with the results from the regression model: *glmModel<- glm(Work ~ 0 + ., data = WomenAtWork, family = binomial)*
-```{r model,echo=FALSE}
+```{r model,echo=TRUE}
 glmModel<- glm(Work ~ 0 + ., data = wat, family = binomial)
 summary(glmModel)
 ```
@@ -519,14 +564,17 @@ The Coefficients of model results about shows relationship between each predicto
 
 Now we Compute an approximate 95% equal tail posterior probability interval for the regression coefficient to the variable NSmallChild
 
-```{r CI,echo=FALSE}
-# We use the function rmvnorm to generate the variates using OptimRes$par as our mean and approxPostStd as sigma 
+```{r CI,echo=TRUE}
+# We use the function rmvnorm to generate the 
+#variates using OptimRes$par as our mean and approxPostStd as sigma 
 postmode<-as.matrix(OptimRes$par[,1])
 poststd<-solve(-OptimRes$hessian)
 watvar<-data.frame(rmvnorm(n=10000,mean = postmode, sigma = poststd))
 
-#For a 95% CI, you would typically calculate the lower and upper bounds at quantiles 0.025 and 0.975, respectively.
-print('An approximate 95% equal tail posterior probability interval for the regression coeffcient to the variable NSmallChild is:')
+#For a 95% CI, you would typically calculate
+#the lower and upper bounds at quantiles 0.025 and 0.975, respectively.
+print('An approximate 95% equal tail posterior probability
+      interval for the regression coeffcient to the variable NSmallChild is:')
 print(quantile(watvar[,6],c(0.025,.975)))
 ```
 The results of the CI tell us that the NSmallChild regression coefficient have a significant impact on the log-odds of the outcome variable as we can see the coefficient fall between the lower and the upper bound of the CI, the direction of this impact in negative and have the highest magnitude in the model coefficients. 
@@ -537,7 +585,7 @@ Now we write a function that simulate draws from the posterior predictive distri
 with an income of 18. Plot the posterior predictive distribution of Pr(y = 0|x) for this woman.
 First we estimate the values of $\beta$ using the normal approximation to the posterior from (a) above, the below graph shows the distribution of the estimated $\beta s$:
 
-```{r predfn,echo=FALSE}
+```{r predfn,echo=TRUE}
 betas<-rmvnorm(n=10000,mean = postmode, sigma = poststd)
 # ploting the beta distribution 
 
@@ -546,7 +594,8 @@ colnames(p_data)<-colnames(wat[2:8])
 names<-colnames(p_data)
 p_fun<- function(coln){
           plt <- ggplot(p_data,aes_string(x = coln)) +
-              geom_histogram(aes(y=..density..),linetype=1,fill='#14213D',bins = 20)+
+              geom_histogram(aes(y=..density..),linetype=1
+                             ,fill='#14213D',bins = 20)+
               geom_density(alpha=.2,color="#FCA311",size=1,fill="#FCA311")
 plt
 }
@@ -555,13 +604,14 @@ plot(arrangeGrob(grobs = lapply(names, p_fun)))
 ```
 Now we Write a function that simulate draws from the posterior predictive distribution of Pr(y = 0jx),where the values of x
 
-```{r predfn,echo=FALSE}
+```{r predfn2,echo=TRUE}
 pred_prob<- function(ndraws,x_new){
         ### Select Logistic or Probit regression and install packages ###
         Probit <- 0
         ### Prior and data inputs ###
         Covs <- c(2:8) # Select which covariates/features to include
-        standardize <- F # If TRUE, covariates/features are standardized to mean 0 and variance 1
+        standardize <- F # If TRUE, covariates/features
+        #are standardized to mean 0 and variance 1
         lambda <- 2 # scaling factor for the prior of beta in our case tau = 2
         # Loading out data set
         wat<-read.table("WomenAtWork.dat",header = T) # read data from file
@@ -583,7 +633,7 @@ pred_prob<- function(ndraws,x_new){
           logLik <- sum( linPred*y - log(1 + exp(linPred)) );
            if (abs(logLik) == Inf){
                         logLik = -20000
-                        }# Likelihood is not finite, stear the optimizer away from here!
+              }# Likelihood is not finite, stear the optimizer away from here!
           logPrior <- dmvnorm(betas, mu, Sigma, log=TRUE);
           return(logLik + logPrior)
         }
@@ -629,19 +679,20 @@ pred_prob<- function(ndraws,x_new){
   }
 ```
 
-```{r predfn,echo=True}
+```{r predfn3,echo=TRUE}
 pred_prob(10000,c(1,18,11,7,40,1,1))
 ```
 
 consider 13 women which all have the same features as the woman in (b).Rewrite your function and plot the posterior predictive distribution for the number of women, out of these 13, that are not working.
 
-```{r predfn,echo=FALSE}
+```{r predfn4,echo=TRUE}
   pred_prob2<- function(ndraws,x_new){
         ### Select Logistic or Probit regression and install packages ###
         Probit <- 0
         ### Prior and data inputs ###
         Covs <- c(2:8) # Select which covariates/features to include
-        standardize <- F # If TRUE, covariates/features are standardized to mean 0 and variance 1
+        standardize <- F # If TRUE, covariates/features are
+                         #standardized to mean 0 and variance 1
         lambda <- 2 # scaling factor for the prior of beta in our case tau = 2
         # Loading out data set
         wat<-read.table("WomenAtWork.dat",header = T) # read data from file
@@ -663,7 +714,8 @@ consider 13 women which all have the same features as the woman in (b).Rewrite y
           logLik <- sum( linPred*y - log(1 + exp(linPred)) );
            if (abs(logLik) == Inf){
                         logLik = -20000
-                        }# Likelihood is not finite, stear the optimizer away from here!
+                        }
+          # Likelihood is not finite, stear the optimizer away from here!
           logPrior <- dmvnorm(betas, mu, Sigma, log=TRUE);
           return(logLik + logPrior)
         }
@@ -710,15 +762,21 @@ consider 13 women which all have the same features as the woman in (b).Rewrite y
           xlab("Predictor") + xlim(c(0,1))+
           ylab("Probability of Outcome") +
           ggtitle("Logistic Regression function with 0.5 as decision boundary")+
-            geom_vline(aes(xintercept = 0.5), color = "#14213D",size=1, alpha = 0.5) +
-            geom_hline(aes(yintercept = 0.5), color = "#14213D",size=1, alpha = 0.5) 
+    geom_vline(aes(xintercept = 0.5), color = "#14213D",size=1, alpha = 0.5) +
+     geom_hline(aes(yintercept = 0.5), color = "#14213D",size=1, alpha = 0.5) 
         
         plt
   }
 ```
 
-```{r predfn,echo=True}
+```{r predfn5,echo=TRUE}
 pred_prob2(10000,c(1,18,11,7,40,1,1))
 ```
+# References:
+1- Bertil Wegmann (2023). Bayesian Learning [Lecture notes]. 732A73, Department of Computer and Information Science,LiU University.
 
-The 
+# Code Appendix
+
+```{r,ref.label=knitr::all_labels(),echo=TRUE,eval=FALSE}
+```
+

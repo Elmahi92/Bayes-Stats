@@ -14,6 +14,9 @@ library(LaplacesDemon)
 
 ## Question 1 Daniel Bernoulli 
 
+let $y_1,...,y_n|\theta \sim Bern(\theta)$ and assume that you have obtained a sample with s = 22
+successes in n = 70 trials. Assume a $Beta(\alpha_0; \beta_0)$ prior for $\theta$ and let $\alpha_0$ = $\beta_0$ = 8.
+
 First we calculate the mean and the standar deviation from the below equation to compare the with sample means and standar deviations of $\theta$ as function of the accumulating number of drawn values.
 $$
 E(\theta|y) \ =\ a/a+b
@@ -22,12 +25,14 @@ $$
 E(\theta|y) \ =\ ab/(a+b)^2(a+b+1)
 $$
 # A
+Draw 10000 random values (nDraws = 10000) from the posterior $\theta|y \sim \beta(\alpha_0+s,\beta_0+f)$, where y = (y1,..,yn); and verify graphically that the posterior mean $E(\theta|y)$ and standard deviation $SD(\theta|y)$ converges to the true values as the number of random draws grows large. [Hint: use rbeta() to draw random values and make graphs of the sample means and standard deviations of $\theta$ as a function of the accumulating number of drawn values].
+
 ### Figure 1.1
 
 
 The figure below shows how the values of the Mean and Sd converges to the true values as the number of draws grows large
 
-```{r ber_fun}
+```{r ber_fun, echo=T}
 ber_fun<-function(n_d,n,s,a,b) {
   #Initial Value of the function givan from the question
   t_n = n
@@ -78,9 +83,11 @@ ber_fun(100,70,22,8,8)
 
 # B
 
+Draw 10000 random values from the posterior to compute the posterior probability $Pr(\theta>0.3|y)$ and compare with the exact value from the Beta posterior. [Hint: use pbeta()].
+
 First we find the value from the beta posterior using the function $pbeta$ we get the value of theta which can be used to  compute the probability that a random variable from a beta distribution is less than or equal to a given value, or greater than a given value, depending on the value of the lower.tail argument. in our case we use lower.tail as False because we need the values grater than.
 
-```{r prob, echo=FALSE}
+```{r prob, echo=T}
 prob<-function(n_d,n,s,a,b,prob){
         t_n = n
         s   = s
@@ -98,9 +105,11 @@ prob(100,70,22,8,8,.3)
 ```
 
 # C
+Draw 10000 random values from the posterior of the odds $\phi = \frac{\theta}{1-\theta}$ by using the previous random draws from the Beta posterior for $\theta$and plot the posterior distribution of $\phi$. [Hint: hist() and density() can be utilized].
+
 Now we want to draw 10000 random values from the posterior of the odds
 
-```{r grp, echo=FALSE}
+```{r grp, echo=T}
 grp<-function(n_d,n,s,a,b){
         t_n = n
         s   = s
@@ -129,7 +138,25 @@ grp(10000,70,22,8,8)
 
 ## Question 2 Log-Normal distribution and Gini Coefficient
 
+
+
+Assume that you have asked 8 randomly selected persons about their monthly income (in thousands Swedish Krona) and obtained the following eight observations: 33, 24, 48, 32, 55, 74, 23, and 17. A common model for non-negative continuous variables is the log-normal distribution. The log-normal distribution $logN(\mu,\sigma^2)$ has density function:
+$$
+\begin{aligned}
+p(y|\mu,\sigma^2)&=\frac{1}{y.\sqrt{2\pi\sigma^2}} exp[-\frac{1}{2\sigma^2} (logy-\mu)^2]
+\end{aligned}
+$$
+where $y>0, -inf<\mu<inf$ and $\sigma^2$ The log-normal distribution is related to the normal distribution as follows: if $y \sim log\ N(\mu,\sigma^2)$  then $log\ y \sim N(\mu,\sigma^2)$. Let $y_1,...,y_n|\mu,\sigma^2 \sim logN(\mu,\sigma^2)$, where $\mu$ = 3.6 is assumed to be known but $\sigma^2$ is unknown with non-informative prior $p(\sigma^2)\propto 1/\sigma^2$ The posterior for $\sigma^2$ is the $inv - \chi^2(n,\tau^2)$ distribution, where:
+$$
+\begin{aligned}
+\tau^2 &= \frac{\sum_{i=1}^{n}(logy_i-\mu^2)^2}{n}
+\end{aligned}
+$$
+
+
+
 # A
+Draw 10000 random values from the posterior of $\sigma^2$ by assuming $\mu$ = 3:6 and plot the posterior distribution.
 
 First we find the value of tau, the question assume that we have 8 randomly selected persons thus we have n = 8 and we have the value of mu = 3.6 Given, to find the value of tau we use this equation: $$\tau^2\ =\ \sum_1^n(log\ y_i \ - \mu)^2/n$$'.
 *Note*
@@ -142,7 +169,7 @@ in the question we have inverse chi distribution is our posterior,  the inverse-
 the inverse chi distribution is The inverse chi-square distribution with degrees of freedom n and scale parameter $s^2$ is closely related to the inverse gamma distribution with shape parameter $\alpha$ = n/2 and scale parameter $\beta$ = 1/(2$s^2$). In fact, if X is Inv-$\chi^2$(n,$s^2$) distributed, then Y = (n$s^2$)/X is Inv-$\gamma$($\alpha$,$\beta$) distributed, and vice versa.
 then we use the function rinvgamma from r and we change on the pramters shape and scale.
 
-```{r lognormal, echo=FALSE}
+```{r lognormal, echo=T}
 y<-c(33,24,48,32,55,74,23,17)
 #n is the sample size
 n=8
@@ -165,6 +192,8 @@ plt
 
 # B
 
+The most common measure of income inequality is the Gini coeffcient, G, where 0 <= G <= 1. G = 0 means a completely equal income distribution, whereas G = 1 means complete income inequality (see e.g. Wikipedia for more information about the Gini coeffcient). It can be shown that $G = 2 \phi(\sigma/\sqrt2)-1$ when incomes follow a $log\ N(\mu,\sigma^2)$ distribution. $\phi(z)$ is the cumulative distribution function (CDF) for the standard normal distribution with mean zero and unit variance. Use the posterior draws in a) to compute the posterior distribution of the Gini coeffcient G for the current data set.
+
 We define  The Gini coefficient as a measure of inequality in a distribution, typically used to measure income inequality. It ranges from 0 (perfect equality, where everyone has the same income) to 1 (perfect inequality, where one person has all the income). A Gini coefficient of 0.5, for example, indicates that 50% of the population has 50% of the total income, while the other 50% of the population has the remaining 50% of the income.
 
 *Steps*:
@@ -181,7 +210,7 @@ Quantiles are points in a probability distribution that divide the distribution 
 
 3- We calculate the value of G by pluggin 1 and 2
 
-```{r Gini, echo=FALSE}
+```{r Gini, echo=T}
 y<-c(33,24,48,32,55,74,23,17)
 #n is the sample size
 n=length(y)
@@ -204,11 +233,15 @@ ggplot(df,aes(x=G))+geom_histogram(aes(y=..density..),color="white",
        title ='Distribution of Gini Coefficient')+
   geom_density(color = "#FCA311", size = 1)
 ```
+
 # C
+Use the posterior draws from b) to compute a 95% equal tail credible interval for G. A 95% equal tail credible interval (a; b) cuts off 2:5% percent of the posterior probability mass to the left of a, and 2:5% to the right of b.
+
+
 To find the 95% CI we use the function $qnorm()$in R with mean and Sd drived from the Gini distribution we found in the previous data.
 here we indicates that 0,025 is the 2,5% cut off point for both uppbe and lower limits.
 
-```{r CI, echo=FALSE}
+```{r CI, echo=T}
 sample_mean= mean(df$G)
 sample_sd= sd(df$G)
 # Compute the 95% confidence interval
@@ -221,10 +254,13 @@ cat("95% confidence interval: [", round(lower_ci, 2), ",", round(upper_ci, 2), "
 ```
 
 # D
+Use the posterior draws from b) to compute a 95% Highest Posterior Density Interval (HPDI) for G. Compare the two intervals in (c) and (d). [Hint: do a kernel density estimate of the posterior of G using the density function in R with default settings, and use that kernel density estimate to compute the HPDI. Note that you need to order/sort the estimated density values to obtain the HPDI.].
+
+
 We define the Highest Posterior Density (HPD) interval is a type of confidence interval in Bayesian inference that contains the most credible values for a parameter based on the observed data. Specifically, it is the narrowest interval that contains a specified proportion (usually 95% or 99%) of the posterior distribution of the parameter.
 To do so First we generate a sample using the posterior mean and Sd then We use the function HDI to find the 95% CI from library(HDInterval)
 
-```{r HDPI, echo=FALSE}
+```{r HDPI, echo=T}
 library(HDInterval)
 
 #First we generate a sample using the posterior mean and Sd
@@ -242,28 +278,51 @@ cat("95% Highest Posterioe Density Interval for G: [", round(hdpi[1], 2), ",", r
 
 ## Question 3 Bayesian inference for the concentration parameter in the von Mises distribution
 
+This exercise is concerned with directional data. The point is to show you that the posterior distribution for somewhat weird models can be obtained by plotting it over a grid of values. The data points are observed wind directions at a given location on ten different days. The data are recorded in degrees: (20, 314, 285, 40, 308, 314, 299, 296, 303, 326) where North is located at zero degrees (see Figure 1 on the next page, where the angles are measured clockwise). To fit with Wikipedia's description of probability distributions for circular data we convert the data into radians $- \pi <= y <= \pi$ . The 10 observations in radians are - 2.79, 2.33, 1.83, -2.44, 2.23, 2.33, 2.07, 2.02, 2.14, 2.54). Assume that these data points conditional on $(\mu,k]$ are independent observations from the following von Mises distribution:
+$$
+\begin{aligned}
+p(y|\mu,k)&= \frac{exp[k.cos(y.\mu)]}{2\pi I_0(k)}, \ -\pi<=y<=\pi
+\end{aligned}
+$$
+where $I_0(k)$ is the modified Bessel function of the first kind of order zero [see ?besselI in R]. The parameter $\mu(-\pi<=y<=\pi)$ is the mean direction and k > 0 is called the concentration parameter. Large k gives a small variance around $\mu$, and vice versa. Assume that $\mu$ is known to be 2:4. Let $k \sim Exponential(\lambda = 0.5)$ a priori, where $\lambda$ is the rate parameter of the exponential distribution (so that the mean is $1/\lambda$).
+
+
 # A
+Derive the expression for what the posterior $p(k|y,\mu)$ is proportional to. Hence, derive the function f (k) such that $p(k|y,\mu) \propto f(k)$ . Then, plot the posterior distribution of $k$ for the wind direction data over a fine grid of $k$ values. [Hint: you need to normalize the posterior distribution of $k$ so that it integrates to one.]
+
+# B
+Find the (approximate) posterior mode of $k$ from the information in a).
+
+
 First to we drive our joint distribution to find the liklehood function from the model distribution.
 We have our model distribution $p(y|\mu,k)$ defined as:
 $$
-P(y|\mu,k)=\prod_{i=1}^n\ \frac{1}{2\pi I_0(k)}*exp(k*Cos(y-\mu))\\= \frac{1}{(2\pi)^n I_0(k)^n}* exp(k*Cos(\sum_{i=1}^n y_i-\mu))
+\begin{aligned}
+P(y|\mu,k)&=\prod_{i=1}^n\ \frac{1}{2\pi I_0(k)}*exp(k*Cos(y-\mu))\\&= \frac{1}{(2\pi)^n I_0(k)^n}* exp(k*Cos(\sum_{i=1}^n y_i-\mu))
+\end{aligned}
 $$
 We have the prior k follows the $exp(\lambda=0.5)$
 $$
-p(k)=0.5*exp(-\lambda*k)
+\begin{aligned}
+p(k)&=0.5*exp(-\lambda*k)
+\end{aligned}
 $$
 now we drive the postrior distribution using bayse formula
 $$
-p(\theta|x)\propto p(x|\theta)\ p(\theta)
+\begin{aligned}
+p(\theta|x)&\propto p(x|\theta)\ p(\theta)
+\end{aligned}
 $$
 We plug the liklehood function drived above with the prior we get:
 $$
-p(k|\mu,y)\propto\frac{1}{(2\pi)^n I_0(k)^n}* exp(k*Cos(\sum_{i=1}^n y_i-\mu))\ .\ 0.5*exp(-\lambda*k) \\
-\propto \frac{1}{I_0(k)^n}* exp(k*Cos(\sum_{i=1}^n y_i-\mu)- \frac{k}{2})
+\begin{aligned}
+p(k|\mu,y)&\propto\frac{1}{(2\pi)^n I_0(k)^n}* exp(k*Cos(\sum_{i=1}^n y_i-\mu))\ .\ 0.5*exp(-\lambda*k) \\
+&\propto \frac{1}{I_0(k)^n}* exp(k*Cos(\sum_{i=1}^n y_i-\mu)- \frac{k}{2})
+\end{aligned}
 $$
 Now we implement the code in R:
 
-```{r k, echo=FALSE}
+```{r k, echo=T}
 # The y and mu values given from the question 
 y<-c(-2.79,2.33,1.83,-2.44,2.23,2.33,2.07,2.02,2.14,2.54)
 mu<- 2.51
@@ -289,3 +348,13 @@ plt
 
 
 ```
+
+# References:
+
+1- Bertil Wegmann (2023). Bayesian Learning [Lecture notes]. 732A73, Department of Computer and Information Science,LiU University.
+
+# Code Appendix
+
+```{r,ref.label=knitr::all_labels(),echo=TRUE,eval=FALSE}
+```
+
