@@ -68,6 +68,73 @@ gibbsDraws <- matrix(0,nDraws,2)
 
 Now we write a code to simulates from the joint posterior using Gibbs sampler.
 ```{r Gibbs Sample, echo=T}
+### The original Code:
+
+# Direct vs Gibbs sampling for bivariate normal distribution
+
+# Initial setting
+mu1 <- 1
+mu2 <- 1
+rho <- 0.9
+mu <- c(mu1,mu2)
+Sigma = matrix(c(1,rho,rho,1),2,2)
+nDraws <- 500 # Number of draws
+
+library(MASS) # To access the mvrnorm() function
+
+# Direct sampling from bivariate normal distribution
+directDraws <- mvrnorm(nDraws, mu, Sigma)
+
+# Gibbs sampling
+gibbsDraws <- matrix(0,nDraws,2)
+theta2 <- 0 # Initial value for theta2
+for (i in 1:nDraws){
+  
+  # Update theta1 given theta2
+  theta1 <- rnorm(1, mean = mu1 + rho*(theta2-mu2), sd = sqrt(1-rho**2))
+  gibbsDraws[i,1] <- theta1
+  
+  # Update theta2 given theta1
+  theta2 <- rnorm(1, mean = mu2 + rho*(theta1-mu1), sd = sqrt(1-rho**2))
+  gibbsDraws[i,2] <- theta2
+  
+}
+
+a_Direct <- acf(directDraws[,1])
+a_Gibbs <- acf(gibbsDraws[,1])
+
+IF_Gibbs <- 1+2*sum(a_Gibbs$acf[-1])
+
+par(mfrow=c(2,4))
+
+# DIRECT SAMPLING
+plot(1:nDraws, directDraws[,1], type = "l",col="blue") # traceplot of direct draws
+
+hist(directDraws[,1],col="blue") # histogram of direct draws
+
+cusumData <- cumsum(directDraws[,1])/seq(1,nDraws) # Cumulative mean value of theta1, direct draws
+plot(1:nDraws, cusumData, type = "l", col="blue")
+
+barplot(height = a_Direct$acf[-1],col="blue") # acf for direct draws
+
+# GIBBS SAMPLING
+plot(1:nDraws, gibbsDraws[,1], type = "l",col="red") # traceplot of Gibbs draws
+
+hist(gibbsDraws[,1],col="red") # histogram of Gibbs draws
+
+cusumData =  cumsum(gibbsDraws[,1])/seq(1,nDraws) # Cumulative mean value of theta1, Gibbs draws
+plot(1:nDraws, cusumData, type = "l", col="red")
+
+barplot(height = a_Gibbs$acf[-1],col="red") # acf for Gibbs draws
+
+# Plotting the cumulative path of estimates of Pr(theta1>0, theta2>0)
+par(mfrow=c(2,1))
+plot(cumsum(directDraws[,1]>0 & directDraws[,2]>0)/seq(1,nDraws),type="l", main='Direct draws', xlab='Iteration number', ylab='', ylim = c(0,1))
+plot(cumsum(gibbsDraws[,1]>0 & gibbsDraws[,2]>0)/seq(1,nDraws),type="l", main='Gibbs draws', xlab='Iteration number', ylab='', ylim = c(0,1))
+
+####################################################
+
+
 ### From lec notes we can use this part of the code
 for (i in 1:nDraws){
   
@@ -547,6 +614,80 @@ model {
   sigma2 ~ scaled_inv_chi_square(1,2); // Scaled-inv-chi2 with nu 1,sigma 2
   y[2:N] ~ normal(mu + phi * y[1:(N - 1)], sqrt(sigma2^2));
 }'
+
+#### In case of normal
+# library(rstan)
+# y=c(4,5,6,4,0,2,5,3,8,6,10,8)
+# N=length(y)
+# StanModel = '
+# data {
+# int<lower=0> N; // Number of observations
+# int<lower=0> y[N]; // Number of flowers
+# }
+# parameters {
+# real mu;
+# real<lower=0> sigma2;
+# }
+# model {
+# mu ~ normal(0,100); // Normal with mean 0, st.dev. 100
+# sigma2 ~ scaled_inv_chi_square(1,2); // Scaled-inv-chi2 with nu 1,sigma 2
+# for(i in 1:N){
+# y[i] ~ normal(mu,sqrt(sigma2));
+# }
+# }'
+########### Multilevel normal
+# StanModel <- '
+# data {
+# int<lower=0> N; // Number of observations
+# int<lower=0> y[N]; // Number of flowers
+# int<lower=0> P; // Number of plants
+# }
+# transformed data {
+# int<lower=0> M; // Number of months
+# M = N / P;
+# }
+# parameters {
+# real mu;
+# real<lower=0> sigma2;
+# real mup[P];
+# real sigmap2[P];
+# }
+# model {
+# mu ~ normal(0,100); // Normal with mean 0, st.dev. 100
+# sigma2 ~ scaled_inv_chi_square(1,2); // Scaled-inv-chi2 with nu 1, sigma 2
+# for(p in 1:P){
+# mup[p] ~ normal(mu,sqrt(sigma2));
+# for(m in 1:M) {
+# y[M*(p-1)+m] ~ normal(mup[p],sqrt(sigmap2[p]));
+# }
+# }
+# }'
+##############Possion 
+# StanModel <- '
+# data {
+# int<lower=0> N; // Number of observations
+# int<lower=0> y[N]; // Number of flowers
+# int<lower=0> P; // Number of plants
+# }
+# transformed data {
+# int<lower=0> M; // Number of months
+# M = N / P;
+# }
+# parameters {
+# real mu;
+# real<lower=0> sigma2;
+# real mup[P];
+# }
+# model {
+# mu ~ normal(0,100); // Normal with mean 0, st.dev. 100
+# sigma2 ~ scaled_inv_chi_square(1,2); // Scaled-inv-chi2 with nu 1, sigma 2
+# for(p in 1:P){
+# mup[p] ~ lognormal(mu,sqrt(sigma2)); // Log-normal
+# for(m in 1:M) {
+# y[M*(p-1)+m] ~ poisson(mup[p]); // Poisson
+# }
+# }
+# }'
 ```
 
 ### Model results
