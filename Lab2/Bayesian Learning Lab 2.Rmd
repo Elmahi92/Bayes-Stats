@@ -16,7 +16,7 @@ library(patchwork)
 library(gridExtra)
 ```
 
-## Linear and polynomial regression
+# Linear and polynomial regression
 
 The dataset TempLambohov.txt contains daily average temperatures (in degree Celcius) at Lambohov, Linköping over the course of the year 2019. The response variable is temp and the covariate is
 
@@ -71,7 +71,7 @@ df$cov_tm<-x/365
 ```
 
 
-# A
+## A
 
 Use the conjugate prior for the linear regression model. The prior hyperparameters $\mu_0, \Omega_0, v_0, \sigma^2_0$ shall be set to sensible values. Start with $\mu_0=(-10,100,-100)^T, \Omega_0=0.02.I_3, v_0=3, \sigma^2_0=2$. Check if this prior agrees with your prior opinions by simulating draws from the joint prior of all parameters and for every draw compute the regression curve. This gives a collection of regression curves; one for each draw from the prior. Does the collection of curves look reasonable? If not, change the prior hyperparameters until the collection of  prior regression curves agrees with your prior beliefs about the regression curve. [Hint: R package mvtnorm can be used and your $inv-\chi^2$ simulator of random draws from Lab 1.]
 
@@ -97,11 +97,11 @@ We have the joint prior for beta and segma2 defined as $\beta|\sigma^2\sim\mathc
 First we draw our random samaple from inv-chi2 using the below defined function from Lec 3 slide 5
 
 ```{r draws, echo=TRUE}
-# Step 1: Draw X ~ χ²(n - 1)
+# Step 1: Draw X folow chi2(n - 1)
 draw_chi_sq <- function(n) {
   return(rchisq(1, df = n - 1))
 }
-# Step 2: Compute σ² = (n - 1) * s² / X
+# Step 2: Compute sigma2 = (n - 1) * s² / X
 compute_sigma_sq <- function(n, segma2_0, X) {
   return((n - 1) * segma2_0 / X)
 }
@@ -213,7 +213,7 @@ plt <- plt +
 plt
 ```
 
-# B
+## B
 
 Write a function that simulate draws from the joint posterior distribution of $\beta_0, \beta_1, \beta_2,\sigma^2$.
 i- Plot a histogram for each marginal posterior of the parameters.
@@ -355,7 +355,8 @@ plt <- ggplot(plt_df, aes(x = x, y = y)) +
 plt
 ```
 
-# C
+## C
+
 It is of interest to locate the time with the highest expected temperature (i.e. the time where $f(time)$ is maximal). Let's call this value $\bar x$. Use the simulated draws in (b) to simulate from the posterior distribution of $\bar x$. [Hint: the regression curve is a quadratic polynomial. Given each posterior draw of $\beta_0, \beta_1, \beta_2$, you can find a simple formula for $\bar x$.]
 
 To simulate from the posterior distribution of the highest expected temperature $\bar X$ we can use the all possible 
@@ -393,7 +394,7 @@ plt <- ggplot(plt_df, aes(x = x, y = y)) +
 plt
 ```
 
-# D
+## D
 Say now that you want to estimate a polynomial regression of order 8, but you suspect that higher order terms may not be needed, and you worry about overfitting the data. Suggest a suitable prior that mitigates this potential problem. You do not need to compute the posterior. Just write down your prior. [Hint: the task is to specify $\mu_0$ and $\Omega_0$ in a suitable way.]
 
 
@@ -450,15 +451,13 @@ v_n\sigma_n^2&=v_0\sigma_0^2+y^Ty-\mu_0^T\Omega_n\mu_n
 \end{aligned}
 $$
 
-## Posterior approximation for classifcation with logistic regression
+# Posterior approximation for classifcation with logistic regression
 
 ![Alt Text](q3.png)
 
 ![Alt Text](q3a.png)
 
-
-
-### a
+## A
 
 Firstly we want to calculate the value of $\tilde \beta$  the posterior mode and the negative of the observed 7x7 hessian evaluated at the posterior mode $J(\tilde \beta)=-\frac{\partial^2\ lnp(\beta|y)}{\partial \beta \partial\beta^T}|_{\beta=\tilde\beta}$.
 Using  code snippets from my demo of logistic regression in Lecture 6.
@@ -541,7 +540,8 @@ if (Probit==1){
 # The argument control is a list of options to 
 #the optimizer optim, where fnscale=-1 means that we minimize 
 # the negative log posterior. Hence, we maximize the log posterior.  
-OptimRes <- optim(initVal,logPost,gr=NULL,y,X,mu,Sigma,method=c("BFGS"),control=list(fnscale=-1),hessian=TRUE)
+OptimRes <- optim(initVal,logPost,gr=NULL,y,X,mu,
+                  Sigma,method=c("BFGS"),control=list(fnscale=-1),hessian=TRUE)
 
 # Printing the results to the screen
 names(OptimRes$par) <- Xnames # Naming the coefficient by covariates
@@ -579,7 +579,7 @@ print(quantile(watvar[,6],c(0.025,.975)))
 ```
 The results of the CI tell us that the NSmallChild regression coefficient have a significant impact on the log-odds of the outcome variable as we can see the coefficient fall between the lower and the upper bound of the CI, the direction of this impact in negative and have the highest magnitude in the model coefficients. 
 
-### b
+## B
 
 Now we write a function that simulate draws from the posterior predictive distribution of Pr(y = 0|x),where the values of x corresponds to a 40-year-old woman, with two children (4 and 7 years old), 11 years of education, 7 years of experience, and a husband
 with an income of 18. Plot the posterior predictive distribution of Pr(y = 0|x) for this woman.
@@ -772,6 +772,7 @@ consider 13 women which all have the same features as the woman in (b).Rewrite y
 ```{r predfn5,echo=TRUE}
 pred_prob2(10000,c(1,18,11,7,40,1,1))
 ```
+
 # References:
 1- Bertil Wegmann (2023). Bayesian Learning [Lecture notes]. 732A73, Department of Computer and Information Science,LiU University.
 
