@@ -372,6 +372,13 @@ plt
 # T_y_rep[ii,1] <- max(y_Vals)
 # }
 # mean(T_y_rep >= T_y)
+# New val x
+# alpha_n <- 2326
+# beta_n <- 7
+# theta <- rgamma(1e4,shape = alpha_n,rate = beta_n)
+# Q_6 <- rpois(1e4,theta)
+# hist(Q_6,main="Posterior distribution",xlab="Q_6",ylab="")
+# mean(Q_6 > 350)
 ```
 
 
