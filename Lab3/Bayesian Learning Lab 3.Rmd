@@ -815,7 +815,6 @@ plot(arrangeGrob(grobs = lapply(names, p_fun)))
 
 Examining the above results, it is evident that the posterior estimates for both $\mu$ and $\phi$ exhibit convergence for each of the two data sets. This convergence indicates that the Markov chain has explored the parameter space sufficiently and reached a stable distribution.
 
-
 # References:
 
 1- Stan Development Team. (2021). Stan user’s guide. Retrieved from https://mc-stan.org/docs/2_27/stan-users-guide/index.html. \

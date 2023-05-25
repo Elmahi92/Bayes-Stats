@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023) (preloaded format=pdflatex 2023.5.22)  22 MAY 2023 09:47
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023) (preloaded format=pdflatex 2023.5.22)  25 MAY 2023 17:20
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -434,143 +434,143 @@ File: ts1lmtt.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 LaTeX Font Info:    Font shape `T1/lmtt/bx/n' in size <10> not available
 (Font)              Font shape `T1/lmtt/b/n' tried instead on input line 215.
 [2]
+
+LaTeX Font Warning: Font shape `T1/lmtt/bx/it' in size <10> not available
+(Font)              Font shape `T1/lmtt/b/sl' tried instead on input line 263.
+
 <Bayesian-Learning-Lab-2_files/figure-latex/plot-1.pdf, id=71, 469.755pt x 325.215pt>
 File: Bayesian-Learning-Lab-2_files/figure-latex/plot-1.pdf Graphic file (type pdf)
 <use Bayesian-Learning-Lab-2_files/figure-latex/plot-1.pdf>
-Package pdftex.def Info: Bayesian-Learning-Lab-2_files/figure-latex/plot-1.pdf  used on input line 298.
+Package pdftex.def Info: Bayesian-Learning-Lab-2_files/figure-latex/plot-1.pdf  used on input line 313.
 (pdftex.def)             Requested size: 469.75386pt x 325.2142pt.
 [3] [4 <./Bayesian-Learning-Lab-2_files/figure-latex/plot-1.pdf>]
-<Bayesian-Learning-Lab-2_files/figure-latex/ploy-1.pdf, id=86, 469.755pt x 325.215pt>
+<Bayesian-Learning-Lab-2_files/figure-latex/ploy-1.pdf, id=87, 469.755pt x 325.215pt>
 File: Bayesian-Learning-Lab-2_files/figure-latex/ploy-1.pdf Graphic file (type pdf)
 <use Bayesian-Learning-Lab-2_files/figure-latex/ploy-1.pdf>
-Package pdftex.def Info: Bayesian-Learning-Lab-2_files/figure-latex/ploy-1.pdf  used on input line 339.
+Package pdftex.def Info: Bayesian-Learning-Lab-2_files/figure-latex/ploy-1.pdf  used on input line 354.
 (pdftex.def)             Requested size: 469.75386pt x 325.2142pt.
 [5 <./Bayesian-Learning-Lab-2_files/figure-latex/ploy-1.pdf>]
-<Bayesian-Learning-Lab-2_files/figure-latex/modefid mu-1.pdf, id=96, 469.755pt x 325.215pt>
+<Bayesian-Learning-Lab-2_files/figure-latex/modefid mu-1.pdf, id=97, 469.755pt x 325.215pt>
 File: Bayesian-Learning-Lab-2_files/figure-latex/modefid mu-1.pdf Graphic file (type pdf)
 <use Bayesian-Learning-Lab-2_files/figure-latex/modefid mu-1.pdf>
-Package pdftex.def Info: Bayesian-Learning-Lab-2_files/figure-latex/modefid mu-1.pdf  used on input line 407.
+Package pdftex.def Info: Bayesian-Learning-Lab-2_files/figure-latex/modefid mu-1.pdf  used on input line 422.
 (pdftex.def)             Requested size: 469.75386pt x 325.2142pt.
 [6]
 
-LaTeX Warning: Command \textasciiacute invalid in math mode on input line 434.
+LaTeX Warning: Command \textasciiacute invalid in math mode on input line 449.
 
-LaTeX Font Info:    Trying to load font information for TS1+lmr on input line 434.
+LaTeX Font Info:    Trying to load font information for TS1+lmr on input line 449.
 (c:/Users/MOALI72/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/lm/ts1lmr.fd
 File: ts1lmr.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
 
-LaTeX Warning: Command \textasciiacute invalid in math mode on input line 434.
+LaTeX Warning: Command \textasciiacute invalid in math mode on input line 449.
 
 
-LaTeX Warning: Command \textasciiacute invalid in math mode on input line 438.
+LaTeX Warning: Command \textasciiacute invalid in math mode on input line 453.
 
 
-LaTeX Warning: Command \textasciiacute invalid in math mode on input line 438.
+LaTeX Warning: Command \textasciiacute invalid in math mode on input line 453.
 
 
-LaTeX Warning: Command \textasciiacute invalid in math mode on input line 438.
+LaTeX Warning: Command \textasciiacute invalid in math mode on input line 453.
 
 
-LaTeX Warning: Command \textasciiacute invalid in math mode on input line 438.
+LaTeX Warning: Command \textasciiacute invalid in math mode on input line 453.
 
 
-LaTeX Warning: Command \textasciiacute invalid in math mode on input line 439.
+LaTeX Warning: Command \textasciiacute invalid in math mode on input line 454.
 
 
-LaTeX Warning: Command \textasciiacute invalid in math mode on input line 439.
+LaTeX Warning: Command \textasciiacute invalid in math mode on input line 454.
 
 [7 <./Bayesian-Learning-Lab-2_files/figure-latex/modefid mu-1.pdf>]
 
-LaTeX Warning: Command \textasciiacute invalid in math mode on input line 445.
+LaTeX Warning: Command \textasciiacute invalid in math mode on input line 460.
 
 
-LaTeX Warning: Command \textasciiacute invalid in math mode on input line 445.
+LaTeX Warning: Command \textasciiacute invalid in math mode on input line 460.
 
 
-LaTeX Warning: Command \textasciiacute invalid in math mode on input line 448.
+LaTeX Warning: Command \textasciiacute invalid in math mode on input line 463.
 
 
-LaTeX Warning: Command \textasciiacute invalid in math mode on input line 448.
+LaTeX Warning: Command \textasciiacute invalid in math mode on input line 463.
 
 
-LaTeX Warning: Command \textasciiacute invalid in math mode on input line 448.
+LaTeX Warning: Command \textasciiacute invalid in math mode on input line 463.
 
 
-LaTeX Warning: Command \textasciiacute invalid in math mode on input line 448.
+LaTeX Warning: Command \textasciiacute invalid in math mode on input line 463.
 
 
-LaTeX Warning: Command \textasciiacute invalid in math mode on input line 478.
+LaTeX Warning: Command \textasciiacute invalid in math mode on input line 493.
 
 
-LaTeX Warning: Command \textasciiacute invalid in math mode on input line 478.
+LaTeX Warning: Command \textasciiacute invalid in math mode on input line 493.
 
 [8]
-<Bayesian-Learning-Lab-2_files/figure-latex/marginal posterior-1.pdf, id=116, 469.755pt x 325.215pt>
+<Bayesian-Learning-Lab-2_files/figure-latex/marginal posterior-1.pdf, id=117, 469.755pt x 325.215pt>
 File: Bayesian-Learning-Lab-2_files/figure-latex/marginal posterior-1.pdf Graphic file (type pdf)
 <use Bayesian-Learning-Lab-2_files/figure-latex/marginal posterior-1.pdf>
-Package pdftex.def Info: Bayesian-Learning-Lab-2_files/figure-latex/marginal posterior-1.pdf  used on input line 534.
+Package pdftex.def Info: Bayesian-Learning-Lab-2_files/figure-latex/marginal posterior-1.pdf  used on input line 549.
 (pdftex.def)             Requested size: 469.75386pt x 325.2142pt.
 
-Underfull \hbox (badness 10000) in paragraph at lines 534--540
+Underfull \hbox (badness 10000) in paragraph at lines 549--555
 [][]
  []
 
 [9 <./Bayesian-Learning-Lab-2_files/figure-latex/marginal posterior-1.pdf>]
-<Bayesian-Learning-Lab-2_files/figure-latex/curve line for the posterior-1.pdf, id=126, 469.755pt x 325.215pt>
+<Bayesian-Learning-Lab-2_files/figure-latex/curve line for the posterior-1.pdf, id=127, 469.755pt x 325.215pt>
 File: Bayesian-Learning-Lab-2_files/figure-latex/curve line for the posterior-1.pdf Graphic file (type pdf)
 <use Bayesian-Learning-Lab-2_files/figure-latex/curve line for the posterior-1.pdf>
-Package pdftex.def Info: Bayesian-Learning-Lab-2_files/figure-latex/curve line for the posterior-1.pdf  used on input line 588.
+Package pdftex.def Info: Bayesian-Learning-Lab-2_files/figure-latex/curve line for the posterior-1.pdf  used on input line 603.
 (pdftex.def)             Requested size: 469.75386pt x 325.2142pt.
 [10] [11 <./Bayesian-Learning-Lab-2_files/figure-latex/curve line for the posterior-1.pdf>]
-<Bayesian-Learning-Lab-2_files/figure-latex/highest expected temperature-1.pdf, id=144, 469.755pt x 325.215pt>
+<Bayesian-Learning-Lab-2_files/figure-latex/highest expected temperature-1.pdf, id=145, 469.755pt x 325.215pt>
 File: Bayesian-Learning-Lab-2_files/figure-latex/highest expected temperature-1.pdf Graphic file (type pdf)
 <use Bayesian-Learning-Lab-2_files/figure-latex/highest expected temperature-1.pdf>
-Package pdftex.def Info: Bayesian-Learning-Lab-2_files/figure-latex/highest expected temperature-1.pdf  used on input line 640.
+Package pdftex.def Info: Bayesian-Learning-Lab-2_files/figure-latex/highest expected temperature-1.pdf  used on input line 655.
 (pdftex.def)             Requested size: 469.75386pt x 325.2142pt.
 [12 <./Bayesian-Learning-Lab-2_files/figure-latex/highest expected temperature-1.pdf>]
 
-LaTeX Warning: Command \textasciiacute invalid in math mode on input line 674.
+LaTeX Warning: Command \textasciiacute invalid in math mode on input line 689.
 
 
-LaTeX Warning: Command \textasciiacute invalid in math mode on input line 674.
+LaTeX Warning: Command \textasciiacute invalid in math mode on input line 689.
 
 
-LaTeX Warning: Command \textasciiacute invalid in math mode on input line 674.
+LaTeX Warning: Command \textasciiacute invalid in math mode on input line 689.
 
 
-LaTeX Warning: Command \textasciiacute invalid in math mode on input line 674.
+LaTeX Warning: Command \textasciiacute invalid in math mode on input line 689.
 
 
-LaTeX Warning: Command \textasciiacute invalid in math mode on input line 675.
+LaTeX Warning: Command \textasciiacute invalid in math mode on input line 690.
 
 
-LaTeX Warning: Command \textasciiacute invalid in math mode on input line 675.
+LaTeX Warning: Command \textasciiacute invalid in math mode on input line 690.
 
-<q3.png, id=158, 665.48625pt x 502.87875pt>
+<q3.png, id=159, 665.48625pt x 502.87875pt>
 File: q3.png Graphic file (type png)
 <use q3.png>
-Package pdftex.def Info: q3.png  used on input line 710.
+Package pdftex.def Info: q3.png  used on input line 725.
 (pdftex.def)             Requested size: 469.75682pt x 354.97461pt.
-<q3a.png, id=160, 633.567pt x 481.8pt>
+<q3a.png, id=161, 633.567pt x 481.8pt>
 File: q3a.png Graphic file (type png)
 <use q3a.png>
-Package pdftex.def Info: q3a.png  used on input line 716.
+Package pdftex.def Info: q3a.png  used on input line 731.
 (pdftex.def)             Requested size: 469.75066pt x 357.22482pt.
-
-LaTeX Font Warning: Font shape `T1/lmtt/bx/it' in size <10> not available
-(Font)              Font shape `T1/lmtt/b/sl' tried instead on input line 739.
-
 [13{c:/Users/MOALI72/AppData/Roaming/TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathex.enc}] [14 <./q3.png>] [15 <./q3a.png>]
-Underfull \vbox (badness 10000) detected at line 821
+Underfull \vbox (badness 10000) detected at line 836
  []
 
 
-Underfull \vbox (badness 10000) detected at line 821
+Underfull \vbox (badness 10000) detected at line 836
  []
 
 [16] [17] [18]
-Overfull \hbox (254.74287pt too wide) in paragraph at lines 976--976
+Overfull \hbox (254.74287pt too wide) in paragraph at lines 991--991
 []\T1/lmtt/m/n/10 ## [1] "An approximate 95% equal tail posterior probability\n      interval for the regression coeffcient to the variable NSmallChild is:"[] 
  []
 
@@ -578,111 +578,111 @@ Overfull \hbox (254.74287pt too wide) in paragraph at lines 976--976
 <Bayesian-Learning-Lab-2_files/figure-latex/predfn-1.pdf, id=203, 469.755pt x 325.215pt>
 File: Bayesian-Learning-Lab-2_files/figure-latex/predfn-1.pdf Graphic file (type pdf)
 <use Bayesian-Learning-Lab-2_files/figure-latex/predfn-1.pdf>
-Package pdftex.def Info: Bayesian-Learning-Lab-2_files/figure-latex/predfn-1.pdf  used on input line 1027.
+Package pdftex.def Info: Bayesian-Learning-Lab-2_files/figure-latex/predfn-1.pdf  used on input line 1042.
 (pdftex.def)             Requested size: 469.75386pt x 325.2142pt.
 
-Underfull \hbox (badness 10000) in paragraph at lines 1027--1030
+Underfull \hbox (badness 10000) in paragraph at lines 1042--1045
 [][]
  []
 
 [20 <./Bayesian-Learning-Lab-2_files/figure-latex/predfn-1.pdf>]
-Underfull \vbox (badness 10000) detected at line 1106
+Underfull \vbox (badness 10000) detected at line 1121
  []
 
 
-Underfull \vbox (badness 10000) detected at line 1106
+Underfull \vbox (badness 10000) detected at line 1121
  []
 
 [21]
 <Bayesian-Learning-Lab-2_files/figure-latex/predfn3-1.pdf, id=220, 469.755pt x 325.215pt>
 File: Bayesian-Learning-Lab-2_files/figure-latex/predfn3-1.pdf Graphic file (type pdf)
 <use Bayesian-Learning-Lab-2_files/figure-latex/predfn3-1.pdf>
-Package pdftex.def Info: Bayesian-Learning-Lab-2_files/figure-latex/predfn3-1.pdf  used on input line 1118.
+Package pdftex.def Info: Bayesian-Learning-Lab-2_files/figure-latex/predfn3-1.pdf  used on input line 1133.
 (pdftex.def)             Requested size: 469.75386pt x 325.2142pt.
 [22 <./Bayesian-Learning-Lab-2_files/figure-latex/predfn3-1.pdf>]
-Underfull \vbox (badness 10000) detected at line 1208
+Underfull \vbox (badness 10000) detected at line 1223
  []
 
 
-Underfull \vbox (badness 10000) detected at line 1208
+Underfull \vbox (badness 10000) detected at line 1223
  []
 
 [23]
 <Bayesian-Learning-Lab-2_files/figure-latex/predfn5-1.pdf, id=237, 469.755pt x 325.215pt>
 File: Bayesian-Learning-Lab-2_files/figure-latex/predfn5-1.pdf Graphic file (type pdf)
 <use Bayesian-Learning-Lab-2_files/figure-latex/predfn5-1.pdf>
-Package pdftex.def Info: Bayesian-Learning-Lab-2_files/figure-latex/predfn5-1.pdf  used on input line 1228.
+Package pdftex.def Info: Bayesian-Learning-Lab-2_files/figure-latex/predfn5-1.pdf  used on input line 1231.
 (pdftex.def)             Requested size: 469.75386pt x 325.2142pt.
-[24] [25 <./Bayesian-Learning-Lab-2_files/figure-latex/predfn5-1.pdf>]
-Underfull \vbox (badness 10000) detected at line 1748
+[24 <./Bayesian-Learning-Lab-2_files/figure-latex/predfn5-1.pdf>] [25]
+Underfull \vbox (badness 10000) detected at line 1794
  []
 
 
-Underfull \vbox (badness 10000) detected at line 1748
+Underfull \vbox (badness 10000) detected at line 1794
  []
 
 [26]
-Underfull \vbox (badness 10000) detected at line 1748
+Underfull \vbox (badness 10000) detected at line 1794
  []
 
 
-Underfull \vbox (badness 10000) detected at line 1748
+Underfull \vbox (badness 10000) detected at line 1794
  []
 
 [27]
-Underfull \vbox (badness 10000) detected at line 1748
+Underfull \vbox (badness 10000) detected at line 1794
  []
 
 
-Underfull \vbox (badness 10000) detected at line 1748
+Underfull \vbox (badness 10000) detected at line 1794
  []
 
 [28]
-Underfull \vbox (badness 10000) detected at line 1748
+Underfull \vbox (badness 10000) detected at line 1794
  []
 
 
-Underfull \vbox (badness 10000) detected at line 1748
+Underfull \vbox (badness 10000) detected at line 1794
  []
 
 [29]
-Underfull \vbox (badness 10000) detected at line 1748
+Underfull \vbox (badness 10000) detected at line 1794
  []
 
 
-Underfull \vbox (badness 10000) detected at line 1748
+Underfull \vbox (badness 10000) detected at line 1794
  []
 
 [30]
-Underfull \vbox (badness 10000) detected at line 1748
+Underfull \vbox (badness 10000) detected at line 1794
  []
 
 
-Underfull \vbox (badness 10000) detected at line 1748
+Underfull \vbox (badness 10000) detected at line 1794
  []
 
 [31]
-Underfull \vbox (badness 10000) detected at line 1748
+Underfull \vbox (badness 10000) detected at line 1794
  []
 
 
-Underfull \vbox (badness 10000) detected at line 1748
+Underfull \vbox (badness 10000) detected at line 1794
  []
 
 [32]
-Underfull \vbox (badness 10000) detected at line 1748
+Underfull \vbox (badness 10000) detected at line 1794
  []
 
 
-Underfull \vbox (badness 10000) detected at line 1748
+Underfull \vbox (badness 10000) detected at line 1794
  []
 
 [33]
-Underfull \vbox (badness 10000) detected at line 1748
+Underfull \vbox (badness 10000) detected at line 1794
  []
 
 
-Underfull \vbox (badness 10000) detected at line 1748
+Underfull \vbox (badness 10000) detected at line 1794
  []
 
 [34] [35] (./Bayesian-Learning-Lab-2.aux)
@@ -692,13 +692,13 @@ Package rerunfilecheck Info: File `Bayesian-Learning-Lab-2.out' has not changed.
 Here is how much of TeX's memory you used:
  11601 strings out of 478056
  186240 string characters out of 5838347
- 1903845 words of memory out of 5000000
+ 1907845 words of memory out of 5000000
  31465 multiletter control sequences out of 15000+600000
  561093 words of font info for 77 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
  75i,8n,76p,547b,576s stack positions out of 10000i,1000n,20000p,200000b,200000s
 <c:/Users/MOALI72/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx12.pfb><c:/Users/MOALI72/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/public/lm/lmex10.pfb><c:/Users/MOALI72/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi10.pfb><c:/Users/MOALI72/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi5.pfb><c:/Users/MOALI72/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi7.pfb><c:/Users/MOALI72/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/public/lm/lmr10.pfb><c:/Users/MOALI72/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/public/lm/lmr12.pfb><c:/Users/MOALI72/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/public/lm/lmr17.pfb><c:/Users/MOALI72/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/public/lm/lmr5.pfb><c:/Users/MOALI72/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/public/lm/lmr7.pfb><c:/Users/MOALI72/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/public/lm/lmri10.pfb><c:/Users/MOALI72/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy10.pfb><c:/Users/MOALI72/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy5.pfb><c:/Users/MOALI72/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy7.pfb><c:/Users/MOALI72/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/public/lm/lmtk10.pfb><c:/Users/MOALI72/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/public/lm/lmtko10.pfb><c:/Users/MOALI72/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/public/lm/lmtt10.pfb><c:/Users/MOALI72/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/public/lm/lmtti10.pfb>
-Output written on Bayesian-Learning-Lab-2.pdf (35 pages, 1217707 bytes).
+Output written on Bayesian-Learning-Lab-2.pdf (35 pages, 1220430 bytes).
 PDF statistics:
  401 PDF objects out of 1000 (max. 8388607)
  300 compressed objects within 3 object streams

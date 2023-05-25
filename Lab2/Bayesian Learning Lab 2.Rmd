@@ -135,6 +135,21 @@ for (i in 1:length(sigma2)) {
 
 After we done with the draws now for every draw compute the regression curve
 ```{r plot,echo=TRUE,fig.align='center'}
+## Example function
+# x1_grid <- seq(min(X[,2]),max(X[,2]),0.1)
+# Mu_draws <- matrix(0,length(x1_grid),2)
+# for (ii in 1:length(x1_grid)){
+# Curr_x <- c(1,x1_grid[ii],x1_grid[ii]**2,27,27**2,x1_grid[ii]*27)
+# CurrMu <- Betas %*% Curr_x
+# Mu_draws[ii,] <- quantile(CurrMu,probs=c(0.025,0.975))
+# }
+# plot(x1_grid,Mu_draws[,1],"n",main="95 % posterior 
+# probability intervals as a function of x1",
+# xlab="x1", ylab="",ylim=c(0,500))
+# lines(x1_grid,Mu_draws[,1],col="blue")
+# lines(x1_grid,Mu_draws[,2],col="blue")
+
+
 # Define a vector of colors
 colors <-c("#FCA311", "#00FF00", "#0000FF", "#FFFF00", "#00FFFF",
             "#FF00FF", "#800000", "#008000", "#000080", "#808000",
@@ -756,17 +771,48 @@ consider 13 women which all have the same features as the woman in (b).Rewrite y
         pr_y$job_flag <- ifelse(pr_y$x_logit <= 0.5, 0, 1)
         plt <- ggplot(pr_y, aes(x = x_logit, y = job_flag)) +
           geom_point(colour="#14213D") +
-          stat_smooth(method="glm",colour="#FCA311", 
-                      alpha = 0.5, se=FALSE, fullrange=TRUE,
-                      method.args = list(family=binomial)) +
+          # stat_smooth(method="glm",colour="#FCA311", 
+          #             alpha = 0.5, se=FALSE, fullrange=TRUE,
+          #             method.args = list(family=binomial)) +
           xlab("Predictor") + xlim(c(0,1))+
           ylab("Probability of Outcome") +
           ggtitle("Logistic Regression function with 0.5 as decision boundary")+
-    geom_vline(aes(xintercept = 0.5), color = "#14213D",size=1, alpha = 0.5) +
-     geom_hline(aes(yintercept = 0.5), color = "#14213D",size=1, alpha = 0.5) 
+    geom_vline(aes(xintercept = 0.5), color = "#14213D",size=1, alpha = 0.1) +
+     geom_hline(aes(yintercept = 0.5), color = "#14213D",size=1, alpha = 0.1) 
         
         plt
   }
+```
+
+```{r example_fun,echo=F,eval=FALSE}
+#######################################################################
+        # Example function
+        # LogPost <- function(theta,n,Sumx3){
+        # 
+        #     logLik <- n*log(theta) -  Sumx3*theta;
+        #     logPrior <- 2*log(theta) - 4*theta;
+        #    
+        #     return(logLik + logPrior)
+        #   }
+        #   theta_grid <- seq(0.01,2.5,0.01)
+        #   PostDens_propto <- exp(LogPost(theta_grid,5,4.084))
+        #   PostDens <- PostDens_propto/(0.01*sum(PostDens_propto))
+        #   plot(theta_grid,PostDens,main="Posterior distribution"
+        #        ,xlab="theta", ylab="")
+        # 
+        # n <- 5
+        # Sumx3 <- 4.084
+        # OptRes <- optim(0.5,LogPost,gr=NULL,n,Sumx3,method=c("L-BFGS-B")
+        #                ,lower=0.1,control=list(fnscale=-1),hessian=TRUE)
+        # 
+        # plot(theta_grid,PostDens,col="blue",main="Posterior distribution"
+        #      ,xlab="theta", ylab="")
+        # lines(theta_grid,dnorm(theta_grid
+        #         ,mean = OptRes$par,sd = sqrt(-1/OptRes$hessian)),col="red")
+        # legend("topleft", legend=c("Approximation", "Exact"
+        #                            ,col=c("red", "blue"), lty=1:2, cex=0.8))
+        
+        ######################################################################
 ```
 
 ```{r predfn5,echo=TRUE}

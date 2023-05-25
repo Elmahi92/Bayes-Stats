@@ -349,6 +349,32 @@ plt
 
 ```
 
+```{r example code, eval=F,echo=F}
+######## Example code y
+# Mu <- Betas[,1] + Betas[,2]*50 + Betas[,3]*50**2 + Betas[,4]*25 + Betas[,5]*25**2 + Betas[,6]*50*25
+# Sigma <- sqrt(Sigma2)
+# y_Vals <- rnorm(10000,Mu,Sigma)
+# plot(density(y_Vals),main="Posterior predictive distribution of y",xlab="y", ylab="")
+######## Example code pi
+# x_obs <- as.vector(c(1,40,1))
+# lin_pred <- Betas%*%x_obs
+# p_i <- exp(lin_pred)/(1+exp(lin_pred))
+# plot(density(p_i),type="l",main="Posterior distribution of p_i",xlab="p_i",ylab="")
+
+######
+
+# Example code Pr(Y)
+# T_y <- max(y)
+# T_y_rep <- matrix(0,nIter,1)
+# Mu <- Betas %*% t(X)
+# for (ii in 1:nIter){
+# y_Vals <- rnorm(length(y),Mu[ii,],Sigma[ii])
+# T_y_rep[ii,1] <- max(y_Vals)
+# }
+# mean(T_y_rep >= T_y)
+```
+
+
 # References:
 
 1- Bertil Wegmann (2023). Bayesian Learning [Lecture notes]. 732A73, Department of Computer and Information Science,LiU University.
