@@ -61,85 +61,28 @@ w<- (n/sigma2_0)/((n/sigma2_0) + (1/tau2_0))# value used to calculate mu_n
 v_0<- 1 # arbirtry initail value let it be 1
 v_n<- v_0+n
 mu_n<- w*(mean(df$logx))+ (1-w)*mu_0
-tau2_n<- (n/sigma2_0)+(1/tau2_0)
+ ###### This part of the code has been modified######
+tau2_n<- 1/((n/sigma2_0)+(1/tau2_0))################# shoud be 1/tau 
+#####################################################
 nDraws<- 1000
 gibbsDraws <- matrix(0,nDraws,2)
 ```
 
 Now we write a code to simulates from the joint posterior using Gibbs sampler.
 ```{r Gibbs Sample, echo=T}
-### The original Code:
 
-# Direct vs Gibbs sampling for bivariate normal distribution
-
-# Initial setting
-mu1 <- 1
-mu2 <- 1
-rho <- 0.9
-mu <- c(mu1,mu2)
-Sigma = matrix(c(1,rho,rho,1),2,2)
-nDraws <- 500 # Number of draws
-
-library(MASS) # To access the mvrnorm() function
-
-# Direct sampling from bivariate normal distribution
-directDraws <- mvrnorm(nDraws, mu, Sigma)
-
-# Gibbs sampling
-gibbsDraws <- matrix(0,nDraws,2)
-theta2 <- 0 # Initial value for theta2
-for (i in 1:nDraws){
-  
-  # Update theta1 given theta2
-  theta1 <- rnorm(1, mean = mu1 + rho*(theta2-mu2), sd = sqrt(1-rho**2))
-  gibbsDraws[i,1] <- theta1
-  
-  # Update theta2 given theta1
-  theta2 <- rnorm(1, mean = mu2 + rho*(theta1-mu1), sd = sqrt(1-rho**2))
-  gibbsDraws[i,2] <- theta2
-  
-}
-
-a_Direct <- acf(directDraws[,1])
-a_Gibbs <- acf(gibbsDraws[,1])
-
-IF_Gibbs <- 1+2*sum(a_Gibbs$acf[-1])
-
-par(mfrow=c(2,4))
-
-# DIRECT SAMPLING
-plot(1:nDraws, directDraws[,1], type = "l",col="blue") # traceplot of direct draws
-
-hist(directDraws[,1],col="blue") # histogram of direct draws
-
-cusumData <- cumsum(directDraws[,1])/seq(1,nDraws) # Cumulative mean value of theta1, direct draws
-plot(1:nDraws, cusumData, type = "l", col="blue")
-
-barplot(height = a_Direct$acf[-1],col="blue") # acf for direct draws
-
-# GIBBS SAMPLING
-plot(1:nDraws, gibbsDraws[,1], type = "l",col="red") # traceplot of Gibbs draws
-
-hist(gibbsDraws[,1],col="red") # histogram of Gibbs draws
-
-cusumData =  cumsum(gibbsDraws[,1])/seq(1,nDraws) # Cumulative mean value of theta1, Gibbs draws
-plot(1:nDraws, cusumData, type = "l", col="red")
-
-barplot(height = a_Gibbs$acf[-1],col="red") # acf for Gibbs draws
-
-# Plotting the cumulative path of estimates of Pr(theta1>0, theta2>0)
-par(mfrow=c(2,1))
-plot(cumsum(directDraws[,1]>0 & directDraws[,2]>0)/seq(1,nDraws),type="l", main='Direct draws', xlab='Iteration number', ylab='', ylim = c(0,1))
-plot(cumsum(gibbsDraws[,1]>0 & gibbsDraws[,2]>0)/seq(1,nDraws),type="l", main='Gibbs draws', xlab='Iteration number', ylab='', ylim = c(0,1))
-
-####################################################
 
 
 ### From lec notes we can use this part of the code
-for (i in 1:nDraws){
-  
+  ###### This part of the code has been modified######
+scale=sigma2_0 #######################################
+for (i in 1:nDraws){##################################
+  w<- (n/scale)/((n/scale) + (1/tau2_0)) ############# 
+  mu_n<- w*(mean(df$logx))+ (1-w)*mu_0 ############### We need to update those parameters as well 
+  tau2_n<- 1/((n/scale)+(1/tau2_0))###################
+  ####################################################
   # Update theta1 ----> mu given theta2
-  theta1 <- rnorm(1, mean = mu_n, sd = (1/tau2_n))
+  theta1 <- rnorm(1, mean = mu_n, sd = (tau2_n))
   gibbsDraws[i,1] <- theta1
   
   scale<- ((v_0*sigma2_0)+(sum((df$logx-theta1)^2)))/(n+v_0)
@@ -151,7 +94,9 @@ for (i in 1:nDraws){
 
 To Evaluate the convergence of the Gibbs sampler we calculate the Inefficiency Factors (IFs) $1+2 \sum_{k=1}^\infty \rho_k$ - where $\rho_k$ is the autocorrelation at lag k - and then we  plot the trajectories of the sampled Markov chains.
 
-```{r Gibbs plot, echo=FALSE,fig.keep='none'}
+
+```{r Gibbs Sampler, echo=FALSE}
+## Finding the acf plots and value
 a_Gibbs_mu <- acf(gibbsDraws[,1])
 a_Gibbs_sigma <- acf(gibbsDraws[,2])
 
@@ -159,9 +104,6 @@ IF_Gibbs_mu <- 1+2*sum(a_Gibbs_mu$acf[-1])
 
 IF_Gibbs_sigma <- 1+2*sum(a_Gibbs_sigma$acf[-1])
 
-```
-
-```{r Gibbs Sampler, echo=FALSE}
 ### From lec notes we can use this part of the code
 plot_df<- as.data.frame(cbind(1:nDraws,gibbsDraws))
 
@@ -178,7 +120,7 @@ p2<-ggplot(plot_df,aes(x=V1))+geom_line(aes(y=V3), color='#FCA311', size=.8)+
   annotate(geom = "text", x = 500, y = 2,
            label = paste0("Inefficiency Factor ",format(round(IF_Gibbs_sigma, 3), nsmall = 3)))+
   labs(title = 'Sigma2 trajectories of the sampled Markov chains',
-       x= 'nDraws', y='Mu')+ theme_classic()
+       x= 'nDraws', y='Sigma')+ theme_classic()
 p1
 p2
 ```
@@ -367,8 +309,13 @@ The first argument our (log) posterior function is theta (theta_old,theta_new), 
 
 ### Function RWMSampler
 
-```{r RWMSampler, echo=TRUE}
-RWMSampler<- function(logPostFunc,nDraws,c,y,x,mu,Sigma){
+
+#### Old solution 
+
+
+```{r RWMSampler, echo=TRUE,eval=FALSE}
+
+RWMSampler_old<- function(logPostFunc,nDraws,c,y,x,mu,Sigma){
   # First we buld our data frame of samples
   sample <- data.frame(matrix(nrow = nDraws, ncol = ncol(x)))
   colnames(sample) <- colnames(x)
@@ -379,9 +326,10 @@ RWMSampler<- function(logPostFunc,nDraws,c,y,x,mu,Sigma){
   # We look at the results of the first sample
   #as theta_i-1 pluged in mvnorm to get theta_i and the we use the values in
   # our proposed logPostFunc
+  counter <- 1
   i=1
-  while (i < nDraws) {
-    theta_old<-as.numeric(sample[i,])
+  while (counter < nDraws) {
+    theta_old<-as.numeric(sample[counter,])
     theta_new<-mvrnorm(1,theta_old,c*postCov)
   # We define th our accept/reject threshold 
     th<-runif(1,0,1)
@@ -396,18 +344,66 @@ RWMSampler<- function(logPostFunc,nDraws,c,y,x,mu,Sigma){
                         Sigma = postCov)
     # the ratio of posterior densities in the Metropolis acceptance probability
     if (th<min(1,exp(proposed-target))) {
-      i=i+1
-      sample[i,]<-theta_new
-    }
+      counter=counter+1
+      sample[counter,]<-theta_new
+    }   
   }
  return(sample)
 }
 ```
 
+
+#### New Solution 
+
+
+```{r RWMSampler, echo=TRUE}
+RWMSampler<- function(logPostFunc,nDraws,c,y,x,mu,Sigma,brnin){
+  # First we buld our data frame of samples
+  sample <- data.frame(matrix(0,nrow = nDraws - brnin, ncol = ncol(x)))
+  colnames(sample) <- colnames(x)
+  # The inital sample value c here represent a tuning parameter
+  # sample[1,] <- mvrnorm(1, posteriorMode, c*postCov)
+  # Now we implement the Metropolis-Hastings
+  #in which we generate samples from the proposal distribution in this case 
+  # We look at the results of the first sample
+  #as theta_i-1 pluged in mvnorm to get theta_i and the we use the values in
+  # our proposed logPostFunc
+ 
+  theta_old<-as.numeric(sample[1,])
+  for (i in 1:nDraws) {
+    
+    theta_new<-mvrnorm(1,theta_old,c*postCov)
+    # We define th our accept/reject threshold 
+    th<-runif(1,0,1)
+    # now we find the value of the target/proposed distribution
+    proposed<- logPostFunc(theta_new,y = y,
+                           x = x,
+                           mu = posteriorMode,
+                           Sigma = postCov)
+    target<- logPostFunc(theta_old,y = y,
+                         x = x,
+                         mu = posteriorMode,
+                         Sigma = postCov)
+    # the ratio of posterior densities in the Metropolis acceptance probability
+    if (th<exp(proposed-target)) {
+      theta_old<-theta_new
+    } 
+    if (i> brnin) {
+      sample[i-brnin,]<-theta_old
+    }
+  }
+  return(sample)
+}
+
+```
+
+
+
 * Now, use your new Metropolis function to sample from the posterior of $\beta$ in the Poisson regression for the eBay dataset.
 ```{r sample from the posterior function, echo=TRUE}
 nDraws=10000
 c=.5
+brnin=100 ##adding this new parameter for buirnin interval
 posteriorMode=OptimRes$par
 postCov=solve(-OptimRes$hessian)
 res <- RWMSampler(logPostFunc = logPossion,
@@ -416,17 +412,20 @@ res <- RWMSampler(logPostFunc = logPossion,
                                   y = y,
                                   x = x,
                                   mu = posteriorMode,
-                                  Sigma = postCov)
+                                  Sigma = postCov,
+                                  brnin = brnin )
 ```
 
 * Assess MCMC convergence by graphical methods.
 
 ```{r sample from the posterior, echo=FALSE}
+### Changing the plot to be trace plot instead of density 
 names<-colnames(res)
 p_fun<- function(coln){
-  plt <- ggplot(res,aes_string(x = coln)) +
-    geom_histogram(aes(y=..density..),linetype=1,fill='#14213D',bins = 20)+
-    geom_density(alpha=.2,color="#FCA311",size=1,fill="#FCA311")
+  plt <- ggplot(res,aes_string(1:(nDraws-brnin),y = coln)) +
+    geom_line( color='#FCA311', size=.8)+
+      labs(x= 'nDraws', y=coln)
+  # We look 
   plt
 }
 
@@ -449,22 +448,20 @@ Use the MCMC draws from c) to simulate from the predictive distribution of the n
 betas<- as.matrix(res)
 # Input data 
 x_new <- as.matrix(c(1,1,0,1,0,1,0,1.2,0.8))
-# calculating the probability
-prob<-data.frame(x=exp(betas  %*% x_new))
+##### This code has been modified
+# calculating the bet for Poisson since we have our y follow poisson 
+beta_pois<-exp(betas  %*% x_new)
+# Finding number of bidders using poisson function
+nbiders<-data.frame(x=rpois(length(beta_pois),beta_pois))
 ```
 
 Plotting the predictive distribution. What is the probability of no bidders in this new auction?
 
 ```{r predictive plot, echo=FALSE}
-ggplot(prob,aes(x = x)) +
+ggplot(nbiders,aes(x = x)) +
   geom_histogram(aes(y=..density..),linetype=1,fill='#14213D',bins = 20)+
-  geom_density(alpha=.2,color="#FCA311",size=1,fill="#FCA311")+
-  annotate(geom = "text", x = .8, y = 5,
-           label = paste0("The probability of no 
-                          bidders in this new auction =",
-                          format(round(mean(x), 3), nsmall = 3)))+
-  labs(x = 'Probabilities', y = 'density',
-           title ='Plot of the predictive distribution')
+    labs(x = 'Number of bidders', y = 'density',
+           title ='Plot of the predictive distribution for Number of bidders')
 ```
 
 
@@ -612,7 +609,7 @@ parameters {
 model {
   mu ~ normal(0,100); // Normal with mean 0, st.dev. 100
   sigma2 ~ scaled_inv_chi_square(1,2); // Scaled-inv-chi2 with nu 1,sigma 2
-  y[2:N] ~ normal(mu + phi * y[1:(N - 1)], sqrt(sigma2^2));
+  y[2:N] ~ normal(mu + phi * (y[1:(N - 1)]-mu), sqrt(sigma2^2));
 }'
 
 #### In case of normal
@@ -817,6 +814,76 @@ Examining the above results, it is evident that the posterior estimates for both
 
 # References:
 
+### Example code from lec notes
+
+```{r plotsy, echo=TRUE,eval=FALSE}
+### The original Code:
+
+# Direct vs Gibbs sampling for bivariate normal distribution
+
+# Initial setting
+mu1 <- 1
+mu2 <- 1
+rho <- 0.9
+mu <- c(mu1,mu2)
+Sigma = matrix(c(1,rho,rho,1),2,2)
+nDraws <- 500 # Number of draws
+
+library(MASS) # To access the mvrnorm() function
+
+# Direct sampling from bivariate normal distribution
+directDraws <- mvrnorm(nDraws, mu, Sigma)
+
+# Gibbs sampling
+gibbsDraws <- matrix(0,nDraws,2)
+theta2 <- 0 # Initial value for theta2
+for (i in 1:nDraws){
+  
+  # Update theta1 given theta2
+  theta1 <- rnorm(1, mean = mu1 + rho*(theta2-mu2), sd = sqrt(1-rho**2))
+  gibbsDraws[i,1] <- theta1
+  
+  # Update theta2 given theta1
+  theta2 <- rnorm(1, mean = mu2 + rho*(theta1-mu1), sd = sqrt(1-rho**2))
+  gibbsDraws[i,2] <- theta2
+  
+}
+
+a_Direct <- acf(directDraws[,1])
+a_Gibbs <- acf(gibbsDraws[,1])
+
+IF_Gibbs <- 1+2*sum(a_Gibbs$acf[-1])
+
+par(mfrow=c(2,4))
+
+# DIRECT SAMPLING
+plot(1:nDraws, directDraws[,1], type = "l",col="blue") # traceplot of direct draws
+
+hist(directDraws[,1],col="blue") # histogram of direct draws
+
+cusumData <- cumsum(directDraws[,1])/seq(1,nDraws) # Cumulative mean value of theta1, direct draws
+plot(1:nDraws, cusumData, type = "l", col="blue")
+
+barplot(height = a_Direct$acf[-1],col="blue") # acf for direct draws
+
+# GIBBS SAMPLING
+plot(1:nDraws, gibbsDraws[,1], type = "l",col="red") # traceplot of Gibbs draws
+
+hist(gibbsDraws[,1],col="red") # histogram of Gibbs draws
+
+cusumData =  cumsum(gibbsDraws[,1])/seq(1,nDraws) # Cumulative mean value of theta1, Gibbs draws
+plot(1:nDraws, cusumData, type = "l", col="red")
+
+barplot(height = a_Gibbs$acf[-1],col="red") # acf for Gibbs draws
+
+# Plotting the cumulative path of estimates of Pr(theta1>0, theta2>0)
+par(mfrow=c(2,1))
+plot(cumsum(directDraws[,1]>0 & directDraws[,2]>0)/seq(1,nDraws),type="l", main='Direct draws', xlab='Iteration number', ylab='', ylim = c(0,1))
+plot(cumsum(gibbsDraws[,1]>0 & gibbsDraws[,2]>0)/seq(1,nDraws),type="l", main='Gibbs draws', xlab='Iteration number', ylab='', ylim = c(0,1))
+
+
+####################################################
+```
 1- Stan Development Team. (2021). Stan user’s guide. Retrieved from https://mc-stan.org/docs/2_27/stan-users-guide/index.html. \
 2- Bertil Wegmann (2023). Bayesian Learning [Lecture notes]. 732A73, Department of Computer and Information Science,LiU University.
 
