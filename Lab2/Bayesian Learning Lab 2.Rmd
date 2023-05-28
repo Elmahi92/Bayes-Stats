@@ -18,7 +18,8 @@ library(gridExtra)
 
 # Linear and polynomial regression
 
-The dataset TempLambohov.txt contains daily average temperatures (in degree Celcius) at Lambohov, Linköping over the course of the year 2019. The response variable is temp and the covariate is
+The dataset TempLambohov.txt contains daily average temperatures (in degree Celcius) at Lambohov, Linköping over the course of the year 2019.\
+The response variable is temp and the covariate is \
 
 $$
 \begin{aligned}
@@ -31,8 +32,6 @@ $$
 temp &= \beta_0 + \beta_1.time \ + e,\ e\sim N(0,\sigma^2)
 \end{aligned}
 $$
-
-
 To answer this question a conjugate prior for the linear regression model will be used in which: 
 The joint prior for $\beta \ and\  \sigma^2$:
 $$
@@ -45,16 +44,26 @@ $$
 \begin{aligned}
 \beta|\sigma^2,y &\sim \ \mathcal{N}(\mu_n,\sigma^2\Omega{_n}^{-1})\\ 
 \sigma^2 &\sim Inv-\chi^2(v_n,\sigma{^2}{_n})\\
-where:\\
+where&:\\
 \mu_n&= (X'X\Omega_0)^{-1}\ (X'X\hat\beta+\Omega_0\mu_0)\\
 \Omega_n&=X'X+\Omega_0\\
 v_n&= v_0+n\\
-v_n\sigma^2&=v_n\sigma^2+(y'y+\mu_0'\Omega_0\mu_0-\mu_n'\Omega_n\mu_n)
+v_n\sigma^2&=v_n\sigma^2+(y'y+\mu_0'\Omega_0\mu_0-\mu_n'\Omega_n\mu_n)\\
+in\ case\ penalizaion\ we\ introduce\ \lambda&: \\
+y|\beta,\sigma^2,x &\sim N(x\beta,\sigma^2I_n)\\
+\beta|\sigma^2,\lambda,y &\sim \ N(\mu_n,\sigma^2\Omega{_n}^{-1})\\ 
+\sigma^2|\lambda,y &\sim Inv-\chi^2(v_n,\sigma{^2}{_n})\\
+p(\lambda|y) &\propto \sqrt(\frac{|\Omega_0|}{X^TX+\Omega_0}).(\frac{v_n\sigma_n^2}{2})^{(\frac{-v_n}{2})} .p(\lambda)\\
+where&:\\
+\mu_n&= (X'X+\Omega_0)^{-1}\ (X'y)\\
+\Omega_n&=X'X+\Omega_0\\
+v_n&= v_0+n\\
+v_n\sigma^2&=v_0\sigma_0^2+(y'y-\mu_n'\Omega_n\mu_n)\\
 \end{aligned}
 $$
 
 
-First we start by reading the files and then we Create the covariate_time vaiable as (the number of days sinvce the beginning of the year / 365)
+First we start by reading the files and then we Create the covariate_time vaiable as (the number of days sinvce the beginning of the year 365).\
 ```{r data, echo=TRUE}
 #reading the files 
 df<-read_xlsx("Linkoping2022.xlsx")
@@ -73,11 +82,12 @@ df$cov_tm<-x/365
 
 ## A
 
-Use the conjugate prior for the linear regression model. The prior hyperparameters $\mu_0, \Omega_0, v_0, \sigma^2_0$ shall be set to sensible values. Start with $\mu_0=(-10,100,-100)^T, \Omega_0=0.02.I_3, v_0=3, \sigma^2_0=2$. Check if this prior agrees with your prior opinions by simulating draws from the joint prior of all parameters and for every draw compute the regression curve. This gives a collection of regression curves; one for each draw from the prior. Does the collection of curves look reasonable? If not, change the prior hyperparameters until the collection of  prior regression curves agrees with your prior beliefs about the regression curve. [Hint: R package mvtnorm can be used and your $inv-\chi^2$ simulator of random draws from Lab 1.]
+Use the conjugate prior for the linear regression model. The prior hyperparameters $\mu_0, \Omega_0, v_0, \sigma^2_0$ shall be set to sensible values. Start with $\mu_0=(-10,100,-100)^T, \Omega_0=0.02.I_3, v_0=3, \sigma^2_0=2$.\
+Check if this prior agrees with your prior opinions by simulating draws from the joint prior of all parameters and for every draw compute the regression curve.\
+This gives a collection of regression curves; one for each draw from the prior. \
+Does the collection of curves look reasonable? If not, change the prior hyperparameters until the collection of  prior regression curves agrees with your prior beliefs about the regression curve. [Hint: R package mvtnorm can be used and your $inv-\chi^2$ simulator of random draws from Lab 1.].\
 
-
-
-We assume to use a conjugate prior from the linear regression in Lec 5 , we have been given the prior hyperparamteres as follow:
+We assume to use a conjugate prior from the linear regression in Lec 5 , we have been given the prior hyperparamteres as follow: \
 
 ```{r par, echo=TRUE}
 #We assume to use a conjugate prior from 
@@ -92,9 +102,9 @@ ndraws=10
 
 ```
 
-We have the joint prior for beta and segma2 defined as $\beta|\sigma^2\sim\mathcal{N}(\mu_0,\sigma^2\Omega_{_0}^{-1})$  and $\sigma^2 \sim Inv-\chi^2(v_o,\sigma^2_0)$ follows Inv-Chi(v0,sigma2_0)
+We have the joint prior for beta and segma2 defined as $\beta|\sigma^2\sim\mathcal{N}(\mu_0,\sigma^2\Omega_{_0}^{-1})$  and $\sigma^2 \sim Inv-\chi^2(v_o,\sigma^2_0)$ follows Inv-Chi(v0,sigma2_0). \ 
 
-First we draw our random samaple from inv-chi2 using the below defined function from Lec 3 slide 5
+First we draw our random samaple from inv-chi2 using the below defined function from Lec 3 slide 5 \
 
 ```{r draws, echo=TRUE}
 # Step 1: Draw X folow chi2(n - 1)
@@ -121,9 +131,9 @@ segma_estimation <- function(n, mu_0, segma2_0, ndraws) {
 sigma2<-segma_estimation(n, mu_0, segma2_0, ndraws)
 ```
 
-Now we estimate the betas values using the formula $\beta|\sigma^2\sim\mathcal{N}(\mu_0,\sigma^2\Omega_{_0}^{-1})$ and we fit the regression based ontemp = beta0 + beta1 time + beta 2 time^2 + erorr
+Now we estimate the betas values using the formula $\beta|\sigma^2\sim\mathcal{N}(\mu_0,\sigma^2\Omega_{_0}^{-1})$ and we fit the regression based ontemp = beta0 + beta1 time + beta 2 time^2 + erorr. \
 
-*Note  we have our error follows the normal distrbution by 0 and $\sigma^2$
+*Note  we have our error follows the normal distrbution by 0 and $\sigma^2$.\
 ```{r sigma estimates ,echo=TRUE}
 for (i in 1:length(sigma2)) {
   e<- rnorm(1,0,sigma2[i])
@@ -133,7 +143,7 @@ for (i in 1:length(sigma2)) {
 }
 ```
 
-After we done with the draws now for every draw compute the regression curve
+After we done with the draws now for every draw compute the regression curve.\
 ```{r plot,echo=TRUE,fig.align='center'}
 ## Example function
 # x1_grid <- seq(min(X[,2]),max(X[,2]),0.1)
@@ -171,7 +181,7 @@ plt <- plt +
 plt
 ```
 
-Comparing the above chart with our  prior beliefs which we can see by running the polynomial model using the *lm* function in R with df = 2 we can see the fitted regression line with to some extend follow our regression line when $\sigma^2$ is equal to *1.037*.
+Comparing the above chart with our  prior beliefs which we can see by running the polynomial model using the *lm* function in R with df = 2 we can see the fitted regression line with to some extend follow our regression line when $\sigma^2$ is equal to *1.037*.\
 
 ```{r ploy,echo=TRUE,fig.align='center'}
 degree <- 2  # Set the degree of the polynomial
@@ -193,7 +203,7 @@ plt
 summary(model)
 
 ```
-Now we draw simulations using the modified $\mu_0$ from the model results we have 
+Now we draw simulations using the modified $\mu_0$ from the model results we have.\
 
 ```{r modefid mu,echo=TRUE,fig.align='center'}
 mu_news= as.matrix(c(7.3,83.1,-78.3),ncol=3)
@@ -231,12 +241,12 @@ plt
 ## B
 
 Write a function that simulate draws from the joint posterior distribution of $\beta_0, \beta_1, \beta_2,\sigma^2$.
-i- Plot a histogram for each marginal posterior of the parameters.
-ii- Make a scatter plot of the temperature data and overlay a curve for the posterior median of the regression function $f(time)=E[temp|time]=\beta_0+\beta_1.time+\beta_2.time^2$, i.e. the median of $f(time)$ is computed for every value of time. In addition, overlay curves for the 95% equal tail posterior probability intervals of $f(time)$, i.e. the 2.5 and 97.5 posterior percentiles of $f(time)$ is computed for every value of time. Does the posterior probability intervals contain most of the data points? Should they?
+i- Plot a histogram for each marginal posterior of the parameters. \
+ii- Make a scatter plot of the temperature data and overlay a curve for the posterior median of the regression function $f(time)=E[temp|time]=\beta_0+\beta_1.time+\beta_2.time^2$, i.e. the median of $f(time)$ is computed for every value of time.\
 
-As we want to estimate the uncertainty in the model parameters. Simulating from the joint posterior allows us to obtain a set of plausible values for all the parameters in the model, taking into account the observed data and prior information.
-to do so:
-we have our non-informative prior:
+In addition, overlay curves for the 95% equal tail posterior probability intervals of $f(time)$, i.e. the 2.5 and 97.5 posterior percentiles of $f(time)$ is computed for every value of time. Does the posterior probability intervals contain most of the data points? Should they? \
+
+As we want to estimate the uncertainty in the model parameters. Simulating from the joint posterior allows us to obtain a set of plausible values for all the parameters in the model, taking into account the observed data and prior information. to do so we have our non-informative prior:\
 $$
 \begin{aligned}
 p(\beta,\sigma^2) \propto \sigma^-1
@@ -253,14 +263,11 @@ k&=number\ of \ \beta s\ in \ our \ case \ 3\\
 s^2&= \frac{1}{n-k}(y-X\hat\beta)´(y-X\hat\beta)
 \end{aligned}
 $$
-Thus to simulate from the joint posterior we need to simulate from:
-1- $p(\sigma|y$
-2- $p(\beta|\sigma^2,y)$
+Thus to simulate from the joint posterior we need to simulate from:\
+1- $p(\sigma|y$. \
+2- $p(\beta|\sigma^2,y)$. \
 
-And then we find the marginal posterior of $\beta$:
-$$\beta|y\sim t_n-k(\hat\beta,s^2(X´X)^-1)$$
-There for to draw a sample from the joint posterior distribution of $\beta_0,\beta_2,\beta_3\ and \ \sigma^2$: 
-we need first to calculate the value of $\hat\beta= (X´X)^-1X´y$
+And then we find the marginal posterior of $\beta$: $$\beta|y\sim t_n-k(\hat\beta,s^2(X´X)^-1)$$ There for to draw a sample from the joint posterior distribution of $\beta_0,\beta_2,\beta_3\ and \ \sigma^2$ we need first to calculate the value of $\hat\beta= (X´X)^-1X´y$: \
 ```{r beta_hat,echo=TRUE}
 y<-as.matrix(df$temp)
 x<-as.matrix(cbind(1,df$cov_tm,df$cov_tm^2))
@@ -282,13 +289,13 @@ sigma2_n <- (v_0 * segma2_0 + (t(y) %*% y + t(mu_0) %*% omega_0
                                %*% mu_0 - t(mu_n) %*% omega_n %*% mu_n)) / v_n
 ```
 
-Now we generate the valuse of $\beta$ from $t_{n-k}(\hat\beta,\ s^2(X´X)^{-1} )$ using $\mu_n$ as our delta and $\sigma^2_n$ as sigma. in R we use function *mvtnorm::rmvt*
+Now we generate the valuse of $\beta$ from $t_{n-k}(\hat\beta,\ s^2(X´X)^{-1} )$ using $\mu_n$ as our delta and $\sigma^2_n$ as sigma. in R we use function. *mvtnorm::rmvt*:
 
 ```{r res,echo=TRUE}
 res<-data.frame(mvtnorm::rmvt(10000,delta=mu_n,df=df_,sigma=sigma2_n[1,1]*solve(t(x)%*%x)))
 ```
 
-i/ Now we Plot a histogram for each marginal posterior of the parameters $\beta's$
+i/ Now we Plot a histogram for each marginal posterior of the parameters $\beta's$.\
 
 ```{r marginal posterior,echo=TRUE}
 #We store the value of betas in a df and 
@@ -325,7 +332,7 @@ plt1+plt2+plt3
 
 ```
 ii/ Make a scatter plot of the temperature data and overlay a curve for the posterior median of the regression function
-$f(time)\ = \ E[temp|time]\ =\ \beta_0+\beta_1.time+\beta_2.time^2$.
+$f(time)\ = \ E[temp|time]\ =\ \beta_0+\beta_1.time+\beta_2.time^2$. \
 First we need to calculate the $f(time)$ by using the results from i we can define:
 
 ```{r temperature data,echo=TRUE}
@@ -349,8 +356,7 @@ for(i in 1:nrow(x)){
 }
 ```
 
-
-by using the results from above we can fit the curve line for the posterior median and 95% CI on the scatter plot of the temperature data as below:
+By using the results from above we can fit the curve line for the posterior median and 95% CI on the scatter plot of the temperature data as below:
 
 ```{r curve line for the posterior,echo=TRUE}
 # Storing the data in one data frame
@@ -372,10 +378,9 @@ plt
 
 ## C
 
-It is of interest to locate the time with the highest expected temperature (i.e. the time where $f(time)$ is maximal). Let's call this value $\bar x$. Use the simulated draws in (b) to simulate from the posterior distribution of $\bar x$. [Hint: the regression curve is a quadratic polynomial. Given each posterior draw of $\beta_0, \beta_1, \beta_2$, you can find a simple formula for $\bar x$.]
-
-To simulate from the posterior distribution of the highest expected temperature $\bar X$ we can use the all possible 
-prediction values that we generated in the task before, then by taking the max value we get the point point wise highest expected temperature over time:
+It is of interest to locate the time with the highest expected temperature (i.e. the time where $f(time)$ is maximal). Let's call this value $\bar x$. Use the simulated draws in (b) to simulate from the posterior distribution of $\bar x$. \
+[Hint: the regression curve is a quadratic polynomial. Given each posterior draw of $\beta_0, \beta_1, \beta_2$, you can find a simple formula for $\bar x$.]. \ 
+To simulate from the posterior distribution of the highest expected temperature $\bar X$ we can use the all possible prediction values that we generated in the task before, then by taking the max value we get the point point wise highest expected temperature over time: \ 
 
 ```{r highest expected temperature,echo=TRUE}
 # Storing the data in one data frame
@@ -410,10 +415,8 @@ plt
 ```
 
 ## D
-Say now that you want to estimate a polynomial regression of order 8, but you suspect that higher order terms may not be needed, and you worry about overfitting the data. Suggest a suitable prior that mitigates this potential problem. You do not need to compute the posterior. Just write down your prior. [Hint: the task is to specify $\mu_0$ and $\Omega_0$ in a suitable way.]
-
-
-To mitigate the problem of over fitting when estimating a polynomial resgression of order 10 without being worry of the over fitting, one can use Smoothness/Shrinkage/Regularization of the prior by introducing $\lambda$ a penalization parameter (See lec 5 Slide 9 Lasso) in this method we have:
+Say now that you want to estimate a polynomial regression of order 8, but you suspect that higher order terms may not be needed, and you worry about overfitting the data. Suggest a suitable prior that mitigates this potential problem. You do not need to compute the posterior. Just write down your prior. [Hint: the task is to specify $\mu_0$ and $\Omega_0$ in a suitable way.]. \
+To mitigate the problem of over fitting when estimating a polynomial resgression of order 10 without being worry of the over fitting, one can use Smoothness/Shrinkage/Regularization of the prior by introducing $\lambda$ a penalization parameter (See lec 5 Slide 9 Lasso) in this method we have: \
 
 $$
 \begin{aligned}
@@ -474,9 +477,23 @@ $$
 
 ## A
 
-Firstly we want to calculate the value of $\tilde \beta$  the posterior mode and the negative of the observed 7x7 hessian evaluated at the posterior mode $J(\tilde \beta)=-\frac{\partial^2\ lnp(\beta|y)}{\partial \beta \partial\beta^T}|_{\beta=\tilde\beta}$.
-Using  code snippets from my demo of logistic regression in Lecture 6.
-First we want to calculate the vale of $\tilde \beta$ and $J(\tilde \beta)=-\frac{\partial^2\ lnp(\beta|y)}{\partial \beta \partial\beta^T}|_{\beta=\tilde\beta}$ by using the *optim*, Note that we have $\tau= 2$ and $\beta \sim N(0,\frac{1}{\lambda}I)$.
+Firstly we want to calculate the value of $\tilde \beta$  the posterior mode and the negative of the observed 7x7 hessian evaluated at the posterior mode $J(\tilde \beta)=-\frac{\partial^2\ lnp(\beta|y)}{\partial \beta \partial\beta^T}|_{\beta=\tilde\beta}$. \
+Using  code snippets from my demo of logistic regression in Lecture 6. First we want to calculate the vale of $\tilde \beta$ and $J(\tilde \beta)=-\frac{\partial^2\ lnp(\beta|y)}{\partial \beta \partial\beta^T}|_{\beta=\tilde\beta}$ by using the *optim*, Note that we have $\tau= 2$ and $\beta \sim N(0,\frac{1}{\lambda}I)$. \
+
+$$
+\begin{aligned}
+Possion\ Model &:\\
+\theta|y_1,..,y_n &\sim Gamma(\alpha+\sum_{i=1}^{n}y_i , \beta +n)\\
+Log\ p(\theta|y_1,..y_n) &\propto (\alpha+\sum_{i=1}^{n}y_i-1) log\theta\ -\ \theta(\beta+n)\\
+Margilization  &:\\
+\frac{\partial lnp(\theta|y)}{\partial\theta} &= \frac{\alpha+\sum_{i=1}^{n}y_i-1}{\theta}-(\beta+n)\\
+\tilde \theta &=\frac{\alpha+\sum_{i=1}^{n}y_i-1}{\beta+n}\\
+Secound\ derivative\ at\ the\ mode\ \tilde \theta &:\\
+\frac{\partial^2 lnp(\theta|y)}{\partial^2\theta} &= - \frac{\alpha+\sum_{i=1}^{n}y_i-1}{(\frac{\alpha+\sum_{i=1}^{n}y_i-1}{\beta+n})^2}\\
+&=\frac{(\beta+n)^2}{\alpha+\sum_{i=1}^{n}y_i-1}
+
+\end{aligned}
+$$
 
 ```{r beta and hessian,echo=TRUE}
 # First we want to calculate the vale of beta and the Jacopiang
@@ -570,14 +587,15 @@ print(OptimRes$hessian)
 print('The approximate posterior standard deviation is:')
 print(approxPostStd)
 ```
-Now we compare with the results from the regression model: *glmModel<- glm(Work ~ 0 + ., data = WomenAtWork, family = binomial)*
+Now we compare with the results from the regression model: *glmModel<- glm(Work ~ 0 + ., data = WomenAtWork, family = binomial)*. \
 ```{r model,echo=TRUE}
 glmModel<- glm(Work ~ 0 + ., data = wat, family = binomial)
 summary(glmModel)
 ```
-The Coefficients of model results about shows relationship between each predictor variable and the log-odds of the outcome variable. variables like *HusbandInc,Age,NSmallChild and NBigChild* have a negative impact on the y variable in which the direction of the relationship, while the rest have a positive impact, our results from the teammate tell the same direction of the model estimates (i.e variables with negative impact *HusbandInc,Age,NSmallChild and NBigChild*). However the magnitude of the coefficient which indicates the strength of the relationship is a bit different.
+The Coefficients of model results about shows relationship between each predictor variable and the log-odds of the outcome variable. variables like *HusbandInc,Age,NSmallChild and NBigChild* have a negative impact on the y variable in which the direction of the relationship, while the rest have a positive impact, our results from the teammate tell the same direction of the model estimates (i.e variables with negative impact *HusbandInc,Age,NSmallChild and NBigChild*). \
+However the magnitude of the coefficient which indicates the strength of the relationship is a bit different. \
 
-Now we Compute an approximate 95% equal tail posterior probability interval for the regression coefficient to the variable NSmallChild
+Now we Compute an approximate 95% equal tail posterior probability interval for the regression coefficient to the variable NSmallChild. \
 
 ```{r CI,echo=TRUE}
 # We use the function rmvnorm to generate the 
@@ -596,8 +614,7 @@ The results of the CI tell us that the NSmallChild regression coefficient have a
 
 ## B
 
-Now we write a function that simulate draws from the posterior predictive distribution of Pr(y = 0|x),where the values of x corresponds to a 40-year-old woman, with two children (4 and 7 years old), 11 years of education, 7 years of experience, and a husband
-with an income of 18. Plot the posterior predictive distribution of Pr(y = 0|x) for this woman.
+Now we write a function that simulate draws from the posterior predictive distribution of Pr(y = 0|x),where the values of x corresponds to a 40-year-old woman, with two children (4 and 7 years old), 11 years of education, 7 years of experience, and a husband with an income of 18. Plot the posterior predictive distribution of Pr(y = 0|x) for this woman. \
 First we estimate the values of $\beta$ using the normal approximation to the posterior from (a) above, the below graph shows the distribution of the estimated $\beta s$:
 
 ```{r predfn,echo=TRUE}
@@ -617,8 +634,7 @@ plt
 
 plot(arrangeGrob(grobs = lapply(names, p_fun)))
 ```
-Now we Write a function that simulate draws from the posterior predictive distribution of Pr(y = 0jx),where the values of x
-
+Now we Write a function that simulate draws from the posterior predictive distribution of Pr(y = 0jx),where the values of x. \
 ```{r predfn2,echo=TRUE}
 pred_prob<- function(ndraws,x_new){
         ### Select Logistic or Probit regression and install packages ###
@@ -698,7 +714,7 @@ pred_prob<- function(ndraws,x_new){
 pred_prob(10000,c(1,18,11,7,40,1,1))
 ```
 
-consider 13 women which all have the same features as the woman in (b).Rewrite your function and plot the posterior predictive distribution for the number of women, out of these 13, that are not working.
+consider 13 women which all have the same features as the woman in (b).Rewrite your function and plot the posterior predictive distribution for the number of women, out of these 13, that are not working. \
 
 ```{r predfn4,echo=TRUE}
   pred_prob2<- function(ndraws,x_new){
