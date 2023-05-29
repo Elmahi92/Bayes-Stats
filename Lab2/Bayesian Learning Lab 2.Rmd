@@ -144,7 +144,10 @@ for (i in 1:length(sigma2)) {
 ```
 
 After we done with the draws now for every draw compute the regression curve.\
-```{r plot,echo=TRUE,fig.align='center'}
+
+
+
+```{r plo2t,echo=F,eval=F}
 ## Example function
 # x1_grid <- seq(min(X[,2]),max(X[,2]),0.1)
 # Mu_draws <- matrix(0,length(x1_grid),2)
@@ -158,6 +161,9 @@ After we done with the draws now for every draw compute the regression curve.\
 # xlab="x1", ylab="",ylim=c(0,500))
 # lines(x1_grid,Mu_draws[,1],col="blue")
 # lines(x1_grid,Mu_draws[,2],col="blue")
+```
+
+```{r plot,echo=TRUE,fig.align='center'}
 
 
 # Define a vector of colors
@@ -491,7 +497,6 @@ Margilization  &:\\
 Secound\ derivative\ at\ the\ mode\ \tilde \theta &:\\
 \frac{\partial^2 lnp(\theta|y)}{\partial^2\theta} &= - \frac{\alpha+\sum_{i=1}^{n}y_i-1}{(\frac{\alpha+\sum_{i=1}^{n}y_i-1}{\beta+n})^2}\\
 &=\frac{(\beta+n)^2}{\alpha+\sum_{i=1}^{n}y_i-1}
-
 \end{aligned}
 $$
 

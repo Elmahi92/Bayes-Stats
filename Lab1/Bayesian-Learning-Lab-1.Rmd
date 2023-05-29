@@ -103,6 +103,9 @@ prob<-function(n_d,n,s,a,b,prob){
         ,paste('The exact value from the Beat posterior', round(p,2))))}
 prob(100,70,22,8,8,.3)
 
+```
+
+```{r prob2, echo=F,eval=FALSE}
 #Example Code from lec 
 
 # #####################################################################################
@@ -275,6 +278,14 @@ plt<-ggplot(df,aes(x=x))+geom_histogram(aes(y=..density..),color="white",
 plt
 ```
 
+```{r lognormal2, echo=F,eval=F}
+#compare the probs
+#mean(Betas[,2]>0 & Betas[,3]>0)
+#For betas we find the quatiles and interpretated the CI
+# Effect_x1x2 <- Betas[,6]
+# plot(density(Effect_x1x2),main="Posterior distribution",xlab="beta_5", ylab="")
+# #quantile(Effect_x1x2,probs=c(0.025,0.975))
+```
 ## B
 
 The most common measure of income inequality is the Gini coeffcient, G, where 0 <= G <= 1. G = 0 means a completely equal income distribution, whereas G = 1 means complete income inequality (see e.g. Wikipedia for more information about the Gini coeffcient).\
@@ -312,6 +323,20 @@ df<-data.frame(x=rinvgamma(nDraws, shape=n/2, scale=n*tau2/2))
 df$phi_arg<-df$x/sqrt(2)
 # Calculating the value of Gini index by appling the formula G=2*phi(sigma/sqrt(2))-1
 
+
+
+df$G<-2*pnorm(sqrt(df$phi_arg),0,1)-1
+#Ploting the Gini distribution
+ggplot(df,aes(x=G))+geom_histogram(aes(y=..density..),color="white",
+                                   linetype=6,
+                                   fill='#14213D',binwidth = 0.05)+
+  labs(x='Estimate Values',y=' ',
+       title ='Distribution of Gini Coefficient')+
+  geom_density(color = "#FCA311", size = 1)
+
+```
+
+```{r Gini2, echo=F,eval=F}
 # Xgrid 
 # x1_grid <- seq(min(X[,2]),max(X[,2]),0.1)
 # Mu_draws <- matrix(0,length(x1_grid),2)
@@ -323,15 +348,6 @@ df$phi_arg<-df$x/sqrt(2)
 # xlab="crim", ylab="",ylim=c(10,30))
 # lines(x1_grid,Mu_draws[,1],col="blue")
 # lines(x1_grid,Mu_draws[,2],col="blue")
-
-df$G<-2*pnorm(sqrt(df$phi_arg),0,1)-1
-#Ploting the Gini distribution
-ggplot(df,aes(x=G))+geom_histogram(aes(y=..density..),color="white",
-                                   linetype=6,
-                                   fill='#14213D',binwidth = 0.05)+
-  labs(x='Estimate Values',y=' ',
-       title ='Distribution of Gini Coefficient')+
-  geom_density(color = "#FCA311", size = 1)
 ```
 
 ## C
@@ -347,7 +363,10 @@ sample_sd= sd(df$G)
 # Compute the 95% confidence interval
 lower_ci <- qnorm(0.025, mean = sample_mean, sd = sample_sd)
 upper_ci <- qnorm(1-0.025, mean = sample_mean, sd = sample_sd)
+cat("95% confidence interval: [", round(lower_ci, 2), ",", round(upper_ci, 2), "]", "\n")
+```
 
+```{r CI2, echo=F,eval=F}
 #In case of utility fun
 # nIter <- 1e4
 # Mean_log_mu <- mean(log(rnorm(nIter,mean = 92,sd = 2)))
@@ -368,7 +387,6 @@ upper_ci <- qnorm(1-0.025, mean = sample_mean, sd = sample_sd)
 # points(cOpt,ExpectedUtility(c=cOpt, Mean_log_mu), col = "red",pch=19)
 # cOpt
 # Print the confidence interval
-cat("95% confidence interval: [", round(lower_ci, 2), ",", round(upper_ci, 2), "]", "\n")
 
 ```
 
@@ -393,7 +411,9 @@ cat("95% equal tail interavl for G : [", round(lower_ci, 2), ",",
 
 cat("95% Highest Posterioe Density Interval for G: [", round(hdpi[1], 2), ",", 
     round(hdpi[2], 2), "]", "\n")
+```
 
+```{r HDPI2, echo=F,eval=F}
 # Simulate and find the pi dist
 # nSim <- 1e5
 # x_pred <- matrix(0,nSim,1)
@@ -476,12 +496,7 @@ plt<-ggplot(df,aes(x=x,y=y))+geom_line(aes(),
                     # we use df$x[which.max(df$y)] to find the mode
                     linetype = "dashed", color = "#14213D",size=.8)
 plt
-#compare the probs
-#mean(Betas[,2]>0 & Betas[,3]>0)
-#For betas we find the quatiles and interpretated the CI
-# Effect_x1x2 <- Betas[,6]
-# plot(density(Effect_x1x2),main="Posterior distribution",xlab="beta_5", ylab="")
-# #quantile(Effect_x1x2,probs=c(0.025,0.975))
+
 
 
 ```

@@ -232,16 +232,6 @@ if (standardize){
   x[,Index] <- scale(x[,Index])
 }
 Npar <- dim(x)[2]
-#############################################################################
-# This is to add y variable as binary response and adding intercept,
-#for now it's not needed
-# for (ii in 1:Nobs){
-#   if (wat$quality[ii] > 5){
-#     y[ii] <- 1
-#   }
-# }
-# wat <- data.frame(intercept=rep(1,Nobs),wat) # add intercept
-############################################################################
 # Setting up the prior
 mu <- c(rep(0,Npar)) # Prior mean vector
 Sigma <- 100*solve(t(x)%*%x) # Prior covariance matrix
